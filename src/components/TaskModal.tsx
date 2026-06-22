@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChecklistItem, CategoryInfo, Teammate, PriorityType, StatusType, ChecklistItemSubtask } from '../types';
-import { X, Save, BadgeCheck, AlertCircle, Sparkles, FolderArchive, Users, Calendar, Clock, Hash, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Trash2, AlertCircle } from 'lucide-react';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -18,8 +18,7 @@ export default function TaskModal({
   onSave, 
   taskToEdit,
   categories,
-  team,
-  isLightMode 
+  team
 }: TaskModalProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -35,7 +34,6 @@ export default function TaskModal({
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Reset or load dynamic defaults on dynamic parameters change
   useEffect(() => {
     if (taskToEdit) {
       setTitle(taskToEdit.title);
@@ -47,7 +45,7 @@ export default function TaskModal({
       setAssignedTo(taskToEdit.assignedTo || []);
       setDueDate(taskToEdit.dueDate || '');
       setTimeline(taskToEdit.timeline || '');
-      setTagsInput(taskToEdit.tags?.join(', ') || '');
+      setTagsInput(taskToEdit.tags?.join(' ') || '');
       setSubtasks(taskToEdit.subtasks || []);
     } else {
       setTitle('');
@@ -73,7 +71,7 @@ export default function TaskModal({
     const newErrors: Record<string, string> = {};
 
     if (!title.trim()) {
-      newErrors.title = 'Specification Title is strictly required';
+      newErrors.title = 'Specification Standard Name is strictly required';
     }
     if (!description.trim()) {
       newErrors.description = 'Detailed target guideline or objective is strictly required';
@@ -98,7 +96,7 @@ export default function TaskModal({
       assignedTo,
       dueDate: dueDate || undefined,
       timeline: timeline.trim() || undefined,
-      tags: tagsInput ? tagsInput.split(',').map(t => {
+      tags: tagsInput ? tagsInput.split(/\s+/).map(t => {
         let clean = t.trim();
         if (!clean) return '';
         if (!clean.startsWith('#')) clean = '#' + clean;
@@ -140,375 +138,334 @@ export default function TaskModal({
   return (
     <div 
       id="task-modal-backdrop"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(2px)'
+      }}
     >
       <div 
-        onSubmit={handleValidateAndSubmit}
         id="task-modal-form-card"
-        className={`w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl border flex flex-col max-h-[90vh] transition-all duration-300 ${
-          isLightMode 
-            ? 'bg-white border-neutral-200 text-neutral-800' 
-            : 'bg-neutral-900 border-neutral-800 text-white'
-        }`}
+        className="w-[540px] max-h-[80vh] overflow-y-auto rounded-lg border flex flex-col p-7 animate-fadeInUp select-none"
+        style={{
+          backgroundColor: 'var(--notion-bg-secondary)',
+          borderColor: 'var(--notion-border)',
+          color: 'var(--notion-text-primary)'
+        }}
       >
         {/* Modal Header */}
-        <div className={`p-5 border-b flex items-center justify-between ${
-          isLightMode ? 'border-neutral-150' : 'border-neutral-800/80'
-        }`}>
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-500">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className={`text-base font-black tracking-tight ${isLightMode ? 'text-neutral-900' : 'text-white'}`}>
-                {taskToEdit ? "Redefine Standards Clause" : "Add Specification Checklist Item"}
-              </h3>
-              <p className={`text-[10px] font-mono uppercase tracking-wider ${isLightMode ? 'text-neutral-450' : 'text-neutral-500'}`}>
-                {taskToEdit ? `Modifying Spec #${taskToEdit.id}` : "Appending from scratch"}
-              </p>
-            </div>
-          </div>
+        <div className="relative mb-5 flex flex-col items-start w-full">
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--notion-text-primary)' }}>
+            {taskToEdit ? "Redefine Standards Clause" : "Add specification checklist item"}
+          </h3>
+          <p style={{ fontSize: '12px', color: 'var(--notion-text-tertiary)' }} className="mt-0.5">
+            {taskToEdit ? `Modifying Check #${taskToEdit.id}` : "Appending from scratch"}
+          </p>
           <button
             type="button"
             onClick={onClose}
-            className={`p-2 rounded-xl transition cursor-pointer ${
-              isLightMode ? 'hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700' : 'hover:bg-neutral-800 text-neutral-400 hover:text-white'
-            }`}
+            className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center cursor-pointer transition-colors duration-100 font-normal outline-none bg-transparent hover:bg-[var(--notion-bg-hover)] rounded"
+            style={{ color: 'var(--notion-text-tertiary)' }}
           >
-            <X className="w-4 h-4" />
+            ×
           </button>
         </div>
 
-        {/* Modal Scrollable Fields */}
-        <form onSubmit={handleValidateAndSubmit} className="flex-1 overflow-y-auto p-5.5 space-y-4">
+        {/* Modal Fields - Property row style */}
+        <form onSubmit={handleValidateAndSubmit} className="space-y-0 w-full text-left">
           
-          {/* TITLE FIELD */}
-          <div className="space-y-1.5">
-            <label className={`text-[10px] font-mono uppercase tracking-widest font-bold block ${
-              isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-            }`}>
-              Verification Standard Name *
+          {/* STANDARD NAME ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Standard name
             </label>
-            <input
-              type="text"
-              className={`w-full font-sans text-xs rounded-xl p-3 outline-none border transition-all ${
-                isLightMode 
-                  ? 'bg-neutral-50 focus:bg-white text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                  : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 focus:border-neutral-700 text-white'
-              }`}
-              placeholder="e.g. CSRF Protection Tokens Validation"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            {errors.title && (
-              <p className="text-[10px] font-medium text-rose-500 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3 shrink-0" />
-                {errors.title}
-              </p>
-            )}
+            <div className="flex-1 min-w-0">
+              <input 
+                type="text" 
+                value={title} 
+                onChange={e => setTitle(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
+                placeholder="e.g. CSRF Protection Tokens Validation"
+              />
+              {errors.title && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {errors.title}
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* OBJECTIVE DESCRIPTION */}
-          <div className="space-y-1.5">
-            <label className={`text-[10px] font-mono uppercase tracking-widest font-bold block ${
-              isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-            }`}>
-              Detailed Guideline / Objective *
+          {/* GUIDELINE ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-2" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Guideline
             </label>
-            <textarea
-              rows={3}
-              className={`w-full font-sans text-xs rounded-xl p-3 outline-none border transition-all resize-none ${
-                isLightMode 
-                  ? 'bg-neutral-50 focus:bg-white text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                  : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 focus:border-neutral-700 text-white'
-              }`}
-              placeholder="Clearly state what has to be implemented or audited to pass this test..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            {errors.description && (
-              <p className="text-[10px] font-medium text-rose-500 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3 shrink-0" />
-                {errors.description}
-              </p>
-            )}
+            <div className="flex-1 min-w-0">
+              <textarea 
+                rows={3}
+                value={description} 
+                onChange={e => setDescription(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none resize-y font-sans pt-1 min-h-[60px]"
+                style={{ color: 'var(--notion-text-primary)' }}
+                placeholder="Clearly state what has to be implemented or audited to pass..."
+              />
+              {errors.description && (
+                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> {errors.description}
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* DEVELOPMENT PHASE SELECTOR */}
-            <div className="space-y-1.5">
-              <label className={`text-[10px] font-mono uppercase tracking-widest font-bold block ${
-                isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-              }`}>
-                Development Phase Grouping
-              </label>
+          {/* PHASE GROUPING ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Phase grouping
+            </label>
+            <div className="flex-1 min-w-0">
               <select
-                className={`w-full font-sans text-xs rounded-xl p-3 outline-none border cursor-pointer ${
-                  isLightMode 
-                    ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                    : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-                }`}
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={e => setCategory(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none cursor-pointer font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
               >
                 {categories.map(cat => (
-                  <option key={cat.id} value={cat.id} className={isLightMode ? 'text-neutral-900' : 'bg-neutral-950 text-white'}>
+                  <option key={cat.id} value={cat.id} className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">
                     {cat.name}
                   </option>
                 ))}
               </select>
             </div>
+          </div>
 
-            {/* CRITICALITY / RISK LEVEL */}
-            <div className="space-y-1.5">
-              <label className={`text-[10px] font-mono uppercase tracking-widest font-bold block ${
-                isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-              }`}>
-                Risk Criticality Level
-              </label>
+          {/* RISK LEVEL ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Risk level
+            </label>
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+              <span 
+                className="w-2 h-2 rounded-full shrink-0" 
+                style={{ 
+                  backgroundColor: priority === 'high' ? 'var(--notion-red)' : priority === 'medium' ? 'var(--notion-amber)' : 'var(--notion-green)' 
+                }} 
+              />
               <select
-                className={`w-full font-sans text-xs rounded-xl p-3 outline-none border cursor-pointer ${
-                  isLightMode 
-                    ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                    : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-                }`}
                 value={priority}
-                onChange={(e) => setPriority(e.target.value as PriorityType)}
+                onChange={e => setPriority(e.target.value as PriorityType)}
+                className="w-full text-xs bg-transparent outline-none border-none cursor-pointer font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
               >
-                <option value="high" className="text-rose-500">🔥 High Safeguard</option>
-                <option value="medium" className="text-amber-500">⚠️ Medium Alert</option>
-                <option value="low" className="text-blue-500">⚙️ Low Staging</option>
+                <option value="high" className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">High</option>
+                <option value="medium" className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">Med</option>
+                <option value="low" className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">Low</option>
               </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* TASK STATUS */}
-            <div className="space-y-1.5">
-              <label className={`text-[10px] font-mono uppercase tracking-widest font-bold block ${
-                isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-              }`}>
-                Task Flow Status
-              </label>
+          {/* TASK STATUS ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Task status
+            </label>
+            <div className="flex-1 min-w-0">
               <select
-                className={`w-full font-sans text-xs rounded-xl p-3 outline-none border cursor-pointer ${
-                  isLightMode 
-                    ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                    : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-                }`}
                 value={status}
-                onChange={(e) => setStatus(e.target.value as StatusType)}
+                onChange={e => setStatus(e.target.value as StatusType)}
+                className="w-full text-xs bg-transparent outline-none border-none cursor-pointer font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
               >
-                <option value="todo">📋 To Do Backlog</option>
-                <option value="in-progress">⚙️ Active Validation</option>
-                <option value="completed">✅ Signed Off</option>
+                <option value="todo" className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">To Do Backlog</option>
+                <option value="in-progress" className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">Active Validation</option>
+                <option value="completed" className="text-stone-900 bg-white dark:text-stone-100 dark:bg-stone-900">Signed Off</option>
               </select>
             </div>
+          </div>
 
-            {/* CREW DELEGATION SELECTION */}
-            <div className="space-y-1.5">
-              <label className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1 font-bold ${
-                isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-              }`}>
-                <Users className="w-3.5 h-3.5" /> Delegate To Crew
-              </label>
-              <div className={`p-2 rounded-xl border max-h-[85px] overflow-y-auto space-y-1 scrollbar-thin ${
-                isLightMode 
-                  ? 'bg-neutral-50 border-neutral-200' 
-                  : 'bg-neutral-950/40 border-neutral-800'
-              }`}>
-                {team.map(member => {
-                  const isChecked = assignedTo.includes(member.id);
-                  return (
-                    <label 
-                      key={member.id} 
-                      className="flex items-center gap-2 cursor-pointer py-0.5"
-                    >
+          {/* DELEGATE TO CREW ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Delegate to crew
+            </label>
+            <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1 font-sans">
+              {team.map(member => {
+                const isChecked = assignedTo.includes(member.id);
+                return (
+                  <label key={member.id} className="flex items-center gap-2 cursor-pointer text-[13px] select-none py-0.5">
+                    <div className="relative">
                       <input
                         type="checkbox"
                         checked={isChecked}
                         onChange={() => handleToggleTeammate(member.id)}
-                        className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 cursor-pointer"
+                        className="sr-only"
                       />
-                      <span className={`text-[10px] font-sans truncate ${
-                        isLightMode ? 'text-neutral-700' : 'text-neutral-200'
-                      }`} title={`${member.name} (${member.role})`}>
-                        {member.name} ({member.role.split(' ')[0]})
-                      </span>
-                    </label>
-                  );
-                })}
-                {team.length === 0 && (
-                  <p className="text-[9px] text-neutral-500 italic p-1">No crew members defined.</p>
-                )}
+                      <div 
+                        className="w-3.5 h-3.5 border rounded flex items-center justify-center transition-all duration-150"
+                        style={{
+                          borderColor: isChecked ? 'var(--notion-accent-blue)' : 'var(--notion-border)',
+                          backgroundColor: isChecked ? 'var(--notion-accent-blue)' : 'transparent',
+                        }}
+                      >
+                        {isChecked && (
+                          <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <span style={{ color: 'var(--notion-text-primary)' }}>
+                      {member.name} ({member.role})
+                    </span>
+                  </label>
+                );
+              })}
+              {team.length === 0 && (
+                <p className="text-xs text-neutral-500 italic">No crew members defined.</p>
+              )}
+            </div>
+          </div>
+
+          {/* DEADLINE DATE ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Deadline date
+            </label>
+            <div className="flex-1 min-w-0">
+              <input 
+                type="date" 
+                value={dueDate} 
+                onChange={e => setDueDate(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
+              />
+            </div>
+          </div>
+
+          {/* TIMELINE DURATION ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Timeline duration
+            </label>
+            <div className="flex-1 min-w-0">
+              <input 
+                type="text" 
+                value={timeline} 
+                onChange={e => setTimeline(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
+                placeholder="e.g. 2 days, Q3"
+              />
+            </div>
+          </div>
+
+          {/* HASHTAG GROUPINGS ROW */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Hashtag groupings
+            </label>
+            <div className="flex-1 min-w-0">
+              <input 
+                type="text" 
+                value={tagsInput} 
+                onChange={e => setTagsInput(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none font-sans"
+                style={{ height: '32px', color: 'var(--notion-text-primary)' }}
+                placeholder="e.g. #tag1 #tag2"
+              />
+            </div>
+          </div>
+
+          {/* ACTIONABLE SUBTASKS */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Subtasks
+            </label>
+            <div className="flex-1 min-w-0 flex flex-col gap-2 pt-1 font-sans">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="flex-1 text-xs bg-transparent outline-none border rounded border-[var(--notion-border)] px-2.5 py-1"
+                  style={{ color: 'var(--notion-text-primary)' }}
+                  placeholder="New subtask..."
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddSubtask();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddSubtask}
+                  className="px-2 rounded-md bg-[var(--notion-accent-blue)] text-white text-xs cursor-pointer flex items-center justify-center"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               </div>
+
+              {subtasks.length > 0 && (
+                <div className="space-y-1.5 max-h-[110px] overflow-y-auto pr-1">
+                  {subtasks.map(sub => (
+                    <div key={sub.id} className="flex items-center justify-between gap-2.5 text-xs">
+                      <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0 select-none">
+                        <input
+                          type="checkbox"
+                          checked={sub.completed}
+                          onChange={() => handleToggleSubtaskLocal(sub.id)}
+                          className="rounded border-neutral-300 text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
+                        />
+                        <span className={`truncate font-sans leading-none ${
+                          sub.completed ? 'line-through text-neutral-500' : 'text-[var(--notion-text-primary)]'
+                        }`}>
+                          {sub.title}
+                        </span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSubtask(sub.id)}
+                        className="text-neutral-500 hover:text-rose-500 p-1 rounded-md"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* DUE DATE & TIMELINE DUAL COLUMNS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1 font-bold ${
-                isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-              }`}>
-                <Calendar className="w-3.5 h-3.5 text-blue-500" /> Deadline Date
-              </label>
-              <input
-                type="date"
-                className={`w-full font-sans text-xs rounded-xl p-3 outline-none border ${
-                  isLightMode 
-                    ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                    : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-                }`}
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+          {/* IMPLEMENTATION NOTES / CODE SPECS */}
+          <div className="flex items-start py-2.5 border-b" style={{ borderColor: 'var(--notion-border)' }}>
+            <label className="w-[120px] shrink-0 text-[12px] uppercase tracking-widest font-normal pt-1.5" style={{ color: 'var(--notion-text-secondary)', letterSpacing: '0.06em' }}>
+              Specs & notes
+            </label>
+            <div className="flex-1 min-w-0">
+              <textarea 
+                rows={2}
+                value={notes} 
+                onChange={e => setNotes(e.target.value)}
+                className="w-full text-xs bg-transparent outline-none border-none resize-y font-mono min-h-[40px] pt-1"
+                style={{ color: 'var(--notion-text-primary)' }}
+                placeholder="Implementation guidelines, notes or code details..."
               />
             </div>
-
-            <div className="space-y-1.5">
-              <label className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1 font-bold ${
-                isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-              }`}>
-                <Clock className="w-3.5 h-3.5 text-amber-500" /> Timeline Duration
-              </label>
-              <input
-                type="text"
-                className={`w-full font-sans text-xs rounded-xl p-3 outline-none border ${
-                  isLightMode 
-                    ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                    : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-                }`}
-                placeholder="e.g. Under review (2 days), Q3"
-                value={timeline}
-                onChange={(e) => setTimeline(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* DYNAMIC METADATA TAGS */}
-          <div className="space-y-1.5">
-            <label className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1 font-bold ${
-              isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-            }`}>
-              <Hash className="w-3.5 h-3.5 text-purple-400" /> Hashtag Groupings
-            </label>
-            <input
-              type="text"
-              className={`w-full font-sans text-xs rounded-xl p-3 outline-none border ${
-                isLightMode 
-                  ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                  : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-              }`}
-              placeholder="Comma separated: security, backend, tls13"
-              value={tagsInput}
-              onChange={(e) => setTagsInput(e.target.value)}
-            />
-            <span className="block text-[9px] text-neutral-500 font-mono">Auto-prefixes tags with '#'</span>
-          </div>
-
-          {/* INTERACTIVE SUBTASK BUILDER */}
-          <div className="space-y-2">
-            <label className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1 font-bold ${
-              isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-            }`}>
-              <BadgeCheck className="w-3.5 h-3.5 text-emerald-500" /> Actionable Subtasks ({subtasks.length})
-            </label>
-            
-            <div className="flex gap-2">
-              <input
-                type="text"
-                className={`flex-1 font-sans text-xs rounded-xl p-2.5 outline-none border ${
-                  isLightMode 
-                    ? 'bg-neutral-50 text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                    : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 text-white'
-                }`}
-                placeholder="Add subtask requirement..."
-                value={newSubtaskTitle}
-                onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddSubtask();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                onClick={handleAddSubtask}
-                className="px-3 rounded-xl bg-blue-600 hover:bg-blue-550 text-white font-bold text-xs"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-
-            {subtasks.length > 0 && (
-              <div className={`p-3 rounded-2xl border space-y-1.5 max-h-[110px] overflow-y-auto scrollbar-thin ${
-                isLightMode ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-950/40 border-neutral-805'
-              }`}>
-                {subtasks.map(sub => (
-                  <div key={sub.id} className="flex items-center justify-between gap-2.5 text-xs">
-                    <label className="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
-                      <input
-                        type="checkbox"
-                        checked={sub.completed}
-                        onChange={() => handleToggleSubtaskLocal(sub.id)}
-                        className="rounded border-neutral-300 text-emerald-500 focus:ring-emerald-500 w-3.5 h-3.5 cursor-pointer"
-                      />
-                      <span className={`truncate font-sans leading-none ${
-                        sub.completed 
-                          ? 'line-through text-neutral-500' 
-                          : isLightMode ? 'text-neutral-800' : 'text-neutral-200'
-                      }`}>
-                        {sub.title}
-                      </span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSubtask(sub.id)}
-                      className="text-neutral-500 hover:text-rose-500 p-1 rounded-md"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* IMPLEMENTATION NOTES */}
-          <div className="space-y-1.5">
-            <label className={`text-[10px] font-mono uppercase tracking-widest font-bold block ${
-              isLightMode ? 'text-neutral-500' : 'text-neutral-400'
-            }`}>
-              Implementation Notes / Code Specs (Supports markdown/code styles)
-            </label>
-            <textarea
-              rows={3}
-              className={`w-full font-mono text-[10px] rounded-xl p-3 outline-none border resize-none ${
-                isLightMode 
-                  ? 'bg-neutral-50 focus:bg-white text-neutral-900 border-neutral-200 focus:border-blue-500' 
-                  : 'bg-neutral-950/50 border-neutral-800 focus:bg-neutral-950 focus:border-neutral-700 text-emerald-450 dark:text-emerald-400'
-              }`}
-              placeholder="e.g. Use process.env.API_KEY securely. Run cpatch for XSS on output parameters."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
           </div>
 
         </form>
 
         {/* Modal Submit Actions Footer */}
-        <div className={`p-4.5 border-t gap-3.5 flex items-center justify-end flex-shrink-0 ${
-          isLightMode ? 'border-neutral-150' : 'border-neutral-800/80'
-        }`}>
+        <div className="pt-4 mt-6 flex items-center justify-end gap-2 border-t w-full" style={{ borderColor: 'var(--notion-border)' }}>
           <button
             type="button"
             onClick={onClose}
-            className={`px-4 py-2.5 rounded-xl text-xs transition duration-150 cursor-pointer ${
-              isLightMode 
-                ? 'bg-neutral-100/80 text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900' 
-                : 'bg-neutral-850 hover:bg-neutral-805 text-neutral-300 hover:text-white'
-            }`}
+            className="px-3 h-8 rounded text-xs transition duration-150 cursor-pointer text-stone-600 dark:text-stone-300 hover:bg-[var(--notion-bg-hover)]"
+            style={{
+              backgroundColor: 'transparent',
+              border: 'none'
+            }}
           >
             Cancel
           </button>
@@ -516,9 +473,11 @@ export default function TaskModal({
           <button
             type="button"
             onClick={(e) => handleValidateAndSubmit(e)}
-            className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer text-white bg-blue-600 hover:bg-blue-550 transition`}
+            className="px-4.5 h-8 rounded text-xs font-semibold cursor-pointer text-white flex items-center justify-center transition"
+            style={{
+              backgroundColor: 'var(--notion-accent-blue)',
+            }}
           >
-            <Save className="w-3.5 h-3.5 text-white" />
             <span>{taskToEdit ? "Recommit Spec" : "Commit Spec"}</span>
           </button>
         </div>

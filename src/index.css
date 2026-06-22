@@ -1,1 +1,130 @@
 @import "tailwindcss";
+
+:root, .light {
+  --notion-bg-primary: #ffffff;
+  --notion-bg-secondary: #f7f6f3;
+  --notion-bg-hover: rgba(55, 53, 47, 0.08);
+  --notion-border: rgba(55, 53, 47, 0.16);
+  --notion-text-primary: rgba(55, 53, 47, 0.9);
+  --notion-text-secondary: rgba(55, 53, 47, 0.65);
+  --notion-text-tertiary: rgba(55, 53, 47, 0.45);
+  --notion-bg-selected: rgba(55, 53, 47, 0.06);
+  --notion-accent-blue: #2383e2;
+  --notion-red: #eb5757;
+  --notion-amber: #df7300;
+  --notion-green: #0f7b6c;
+
+  /* Notion-style palette standard variables */
+  --n-bg: #f7f6f3;
+  --n-surface: #ffffff;
+  --n-hover: #f1f0ed;
+  --n-selected: #eae9e4;
+  --n-border: #e9e9e7;
+  --n-tx1: #37352f;
+  --n-tx2: #787774;
+  --n-tx3: #aeaca8;
+  --n-blue: #2383e2;
+  --n-red: #e03e3e;
+  --n-amber: #d9730d;
+  --n-green: #0f7b6c;
+}
+
+.dark {
+  --notion-bg-primary: #191919;
+  --notion-bg-secondary: #202020;
+  --notion-bg-hover: rgba(255, 255, 255, 0.055);
+  --notion-border: rgba(255, 255, 255, 0.13);
+  --notion-text-primary: #e6e6e5;
+  --notion-text-secondary: rgba(255, 255, 255, 0.6);
+  --notion-text-tertiary: rgba(255, 255, 255, 0.4);
+  --notion-bg-selected: rgba(255, 255, 255, 0.08);
+  --notion-accent-blue: #2eaadc;
+  --notion-red: #ff7369;
+  --notion-amber: #faa700;
+  --notion-green: #44b281;
+
+  /* Dark mode palette fallbacks */
+  --n-bg: #191919;
+  --n-surface: #202020;
+  --n-hover: rgba(255, 255, 255, 0.055);
+  --n-selected: rgba(255, 255, 255, 0.08);
+  --n-border: rgba(255, 255, 255, 0.13);
+  --n-tx1: #e6e6e5;
+  --n-tx2: rgba(255, 255, 255, 0.6);
+  --n-tx3: rgba(255, 255, 255, 0.4);
+  --n-blue: #2eaadc;
+  --n-red: #ff7369;
+  --n-amber: #faa700;
+  --n-green: #44b281;
+}
+
+/* MICRO-INTERACTIONS AND ANIMATIONS */
+
+/* Fade-in up animation for modals */
+@keyframes fadeInUp {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 180ms ease forwards;
+}
+
+/* Slide-in right animation for toasts */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 180ms ease forwards;
+}
+
+/* Global Transitions */
+.notion-transition {
+  transition: background 120ms ease, color 120ms ease;
+}
+
+/* Button Active states */
+.notion-btn-active:active {
+  transform: scale(0.98);
+  transition: transform 80ms;
+}
+
+/* Card hover border reveal transition */
+.notion-card {
+  transition: border-color 150ms ease;
+}
+.notion-card:hover {
+  border-color: var(--notion-bg-hover);
+}
+
+/* Hover opacity transitions */
+.notion-hover-trigger .notion-hover-reveal {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.notion-hover-trigger:hover .notion-hover-reveal {
+  opacity: 1;
+}
+
+/* Scrollbar Utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

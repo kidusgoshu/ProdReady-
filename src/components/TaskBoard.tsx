@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ChecklistItem, CategoryInfo, Teammate, StatusType } from '../types';
 import TaskCard from './TaskCard';
-import { Kanban, Coffee, ClipboardList, CheckCircle2 } from 'lucide-react';
 
 interface TaskBoardProps {
   tasks: ChecklistItem[];
@@ -11,6 +10,7 @@ interface TaskBoardProps {
   onDelete: (id: string) => void;
   onMoveStatus: (id: string, nextStatus: StatusType) => void;
   isLightMode?: boolean;
+  onNewCard?: (status: StatusType) => void;
 }
 
 export default function TaskBoard({ 
@@ -20,45 +20,25 @@ export default function TaskBoard({
   onEdit, 
   onDelete, 
   onMoveStatus,
-  isLightMode = false 
+  onNewCard
 }: TaskBoardProps) {
   const [activeDropColumn, setActiveDropColumn] = useState<StatusType | null>(null);
 
   const columns: { 
     id: StatusType; 
     name: string; 
-    icon: React.ComponentType<any>; 
-    color: string; 
-    lightColor: string;
-    bgHighlight: string;
-    bgHighlightLight: string;
   }[] = [
     {
       id: 'todo',
-      name: 'To Do Backlog',
-      icon: ClipboardList,
-      color: 'text-neutral-400 bg-neutral-900 border-neutral-800',
-      lightColor: 'text-neutral-600 bg-neutral-200/55 border-neutral-300',
-      bgHighlight: 'bg-neutral-850 border-neutral-700/60',
-      bgHighlightLight: 'bg-neutral-200 border-neutral-300'
+      name: 'To do'
     },
     {
       id: 'in-progress',
-      name: 'Active Validation',
-      icon: Kanban,
-      color: 'text-amber-400 bg-amber-500/10 border-amber-955/40',
-      lightColor: 'text-amber-600 bg-amber-100 border-amber-250',
-      bgHighlight: 'bg-amber-950/20 border-amber-700/40',
-      bgHighlightLight: 'bg-amber-50 border-amber-300'
+      name: 'Active validation'
     },
     {
       id: 'completed',
-      name: 'Production Signed Off',
-      icon: CheckCircle2,
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-955/40',
-      lightColor: 'text-emerald-600 bg-emerald-100 border-emerald-250',
-      bgHighlight: 'bg-emerald-950/20 border-emerald-700/40',
-      bgHighlightLight: 'bg-emerald-50 border-emerald-300'
+      name: 'Production signed off'
     }
   ];
 
@@ -86,10 +66,13 @@ export default function TaskBoard({
   };
 
   return (
-    <div id="board-grid-cols" className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    <div 
+      id="board-grid-cols" 
+      className="flex items-start overflow-x-auto gap-4 pb-4 w-full select-none"
+      style={{ minHeight: '600px' }}
+    >
       {columns.map(col => {
         const colTasks = tasks.filter(task => task.status === col.id);
-        const IconComponent = col.icon;
         const isHovering = activeDropColumn === col.id;
 
         return (
@@ -99,66 +82,79 @@ export default function TaskBoard({
             onDragEnter={(e) => handleDragEnter(e, col.id)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, col.id)}
-            className={`flex flex-col h-full min-h-[500px] rounded-3xl p-4.5 border transition-all duration-300 ${
-              isHovering 
-                ? isLightMode
-                  ? `${col.bgHighlightLight} shadow-md scale-[1.01]`
-                  : `${col.bgHighlight} shadow-2xl scale-[1.01]`
-                : isLightMode
-                ? 'bg-neutral-100/50 border-neutral-200/90'
-                : 'bg-neutral-900/15 backdrop-blur-md border-neutral-855/80'
-            }`}
+            style={{
+              width: '300px',
+              backgroundColor: isHovering ? 'var(--notion-bg-hover)' : 'var(--notion-bg-primary)'
+            }}
+            className="flex-shrink-0 flex flex-col h-full min-h-[500px] transition-all duration-200"
           >
             {/* Column Header */}
-            <div className={`flex items-center justify-between mb-4.5 pb-2.5 border-b flex-shrink-0 ${
-              isLightMode ? 'border-neutral-200/80' : 'border-neutral-800/60'
-            }`}>
-              <div className="flex items-center gap-2">
-                <div className={`p-1.5 rounded-lg border flex-shrink-0 ${
-                  isLightMode ? col.lightColor : col.color
-                }`}>
-                  <IconComponent className="w-4 h-4" />
-                </div>
-                <h3 className={`text-sm font-bold tracking-tight font-sans ${
-                  isLightMode ? 'text-neutral-800' : 'text-white'
-                }`}>{col.name}</h3>
-              </div>
-              <span className={`font-mono text-xs px-2.5 py-0.5 rounded-full font-bold border ${
-                isLightMode 
-                  ? 'bg-neutral-200/80 border-neutral-300 text-neutral-600' 
-                  : 'bg-neutral-950 border-neutral-800 text-neutral-400'
-              }`}>
+            <div className="flex items-center gap-2 mb-3 pb-1 select-none flex-shrink-0">
+              <h3 
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: 'var(--n-tx2)'
+                }}
+              >
+                {col.name}
+              </h3>
+              
+              <span 
+                className="flex items-center justify-center font-mono"
+                style={{
+                  fontSize: '11px',
+                  background: 'var(--n-hover)',
+                  color: 'var(--n-tx2)',
+                  borderRadius: '3px',
+                  padding: '1px 5px',
+                  marginLeft: '6px'
+                }}
+              >
                 {colTasks.length}
               </span>
             </div>
 
-            {/* List region layout */}
-            <div className="flex-1 space-y-3.5 overflow-y-auto max-h-[60vh] md:max-h-[75vh] pr-1.5 scrollbar-thin">
+            {/* List column body */}
+            <div className="flex-1 space-y-2 overflow-y-auto max-h-[75vh] pr-1.5 scrollbar-none">
               {colTasks.length > 0 ? (
-                colTasks.map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    categories={categories}
-                    team={team}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onMoveStatus={onMoveStatus}
-                    isLightMode={isLightMode}
-                  />
-                ))
+                <>
+                  {colTasks.map(task => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      categories={categories}
+                      team={team}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onMoveStatus={onMoveStatus}
+                    />
+                  ))}
+                  
+                  {/* Subtle placeholder to add new card inside non-empty list of columns */}
+                  <div 
+                    onClick={() => onNewCard?.(col.id)}
+                    style={{
+                      fontSize: '13px',
+                      color: 'var(--notion-text-tertiary)'
+                    }}
+                    className="cursor-pointer hover:text-[var(--notion-text-primary)] transition-colors duration-150 py-1.5 px-2 select-none"
+                  >
+                    + New card
+                  </div>
+                </>
               ) : (
                 <div 
-                  style={{ borderWidth: '1.5px' }}
-                  className={`min-h-[120px] flex flex-col items-center justify-center text-center p-4 border-dashed border-border rounded-2xl select-none ${
-                    isLightMode 
-                      ? 'border-neutral-250 text-neutral-500 bg-neutral-50/50' 
-                      : 'border-neutral-800 text-neutral-400 bg-neutral-950/20'
-                  }`}
+                  onClick={() => onNewCard?.(col.id)}
+                  style={{
+                    fontSize: '13px',
+                    color: 'var(--notion-text-tertiary)'
+                  }}
+                  className="cursor-pointer hover:text-[var(--notion-text-primary)] transition-colors duration-150 py-1.5 px-2 select-none"
                 >
-                  <span className="text-xs text-muted-foreground text-neutral-500 dark:text-neutral-400 font-medium">
-                    drag cards here to validate
-                  </span>
+                  + New card
                 </div>
               )}
             </div>

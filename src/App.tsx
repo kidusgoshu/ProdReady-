@@ -879,9 +879,11 @@ export default function App() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
-          isLightMode ? 'bg-neutral-50 text-neutral-800' : 'bg-neutral-950 text-neutral-100'
-        }`}
+        className="min-h-screen flex flex-col font-sans transition-colors duration-300"
+        style={{
+          backgroundColor: 'var(--n-bg)',
+          color: 'var(--n-tx1)'
+        }}
       >
         {/* =========================================================================
             HEADER PREFERENCES NAVIGATION
@@ -917,7 +919,22 @@ export default function App() {
               <h1 className={`text-sm md:text-base font-black tracking-tight flex items-center gap-1.5 ${
                 isLightMode ? 'text-neutral-900' : 'text-white'
               }`}>
-                ProdReady <span className="text-[9px] md:text-[10px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 px-1.5 py-0.5 rounded-full font-mono uppercase font-bold">Consolidated STG</span>
+                ProdReady <span 
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 400,
+                    color: 'var(--n-tx3)',
+                    background: 'transparent',
+                    border: '1px solid var(--n-border)',
+                    borderRadius: '3px',
+                    padding: '1px 5px',
+                    textTransform: 'none',
+                    letterSpacing: 'normal'
+                  }}
+                  className="font-mono"
+                >
+                  consolidated stg
+                </span>
               </h1>
               <p className={`text-[9px] md:text-[10px] font-mono tracking-wide ${
                 isLightMode ? 'text-neutral-500' : 'text-neutral-500'
@@ -930,63 +947,6 @@ export default function App() {
           {/* Core styling segment bars */}
           <div className="flex flex-wrap items-center gap-3.5 w-full md:w-auto justify-end">
             
-            {/* Color accent controls */}
-            <div className={`flex items-center gap-2 p-1 px-1.5 rounded-xl border ${
-              isLightMode ? 'bg-neutral-100 border-neutral-250' : 'bg-neutral-900/85 border-neutral-800'
-            }`}>
-              <Palette className={`w-3.5 h-3.5 ${isLightMode ? 'text-neutral-500' : 'text-neutral-400'}`} />
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setColorScheme('default')}
-                  type="button"
-                  className={`w-3 h-3 rounded-full bg-blue-500 cursor-pointer transition transform hover:scale-120 ${
-                    colorScheme === 'default' ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''
-                  }`}
-                  title="Sapphire iOS Theme"
-                />
-                <button
-                  onClick={() => setColorScheme('emerald')}
-                  type="button"
-                  className={`w-3 h-3 rounded-full bg-emerald-500 cursor-pointer transition transform hover:scale-120 ${
-                    colorScheme === 'emerald' ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
-                  }`}
-                  title="Security Emerald Theme"
-                />
-                <button
-                  onClick={() => setColorScheme('sunset')}
-                  type="button"
-                  className={`w-3 h-3 rounded-full bg-amber-500 cursor-pointer transition transform hover:scale-120 ${
-                    colorScheme === 'sunset' ? 'ring-2 ring-offset-2 ring-amber-500 scale-110' : ''
-                  }`}
-                  title="Sunset Alert Red Theme"
-                />
-                <button
-                  onClick={() => setColorScheme('monochrome')}
-                  type="button"
-                  className={`w-3 h-3 rounded-full bg-neutral-400 cursor-pointer transition transform hover:scale-120 ${
-                    colorScheme === 'monochrome' ? 'ring-2 ring-offset-2 ring-neutral-400 scale-110' : ''
-                  }`}
-                  title="Monochrome Minimalist Theme"
-                />
-                <button
-                  onClick={() => setColorScheme('royal')}
-                  type="button"
-                  className={`w-3 h-3 rounded-full bg-indigo-500 cursor-pointer transition transform hover:scale-120 ${
-                    colorScheme === 'royal' ? 'ring-2 ring-offset-2 ring-indigo-500 scale-110' : ''
-                  }`}
-                  title="Cupertino Royal Theme"
-                />
-                <button
-                  onClick={() => setColorScheme('neon')}
-                  type="button"
-                  className={`w-3 h-3 rounded-full bg-pink-500 cursor-pointer transition transform hover:scale-120 ${
-                    colorScheme === 'neon' ? 'ring-2 ring-offset-2 ring-pink-500 scale-110' : ''
-                  }`}
-                  title="Retro Tokyo Synthwave Theme"
-                />
-              </div>
-            </div>
-
             {/* Segmented iOS theme selector */}
             <div className={`p-1 rounded-2xl flex items-center gap-0.5 border ${
               isLightMode ? 'bg-neutral-100 border-neutral-200' : 'bg-neutral-900 border-neutral-800'
@@ -1054,27 +1014,24 @@ export default function App() {
             {isSidebarOpen && (
               <motion.aside
                 initial={{ width: 0, opacity: 0 }}
-                animate={{ width: 330, opacity: 1 }}
+                animate={{ width: 240, opacity: 1 }}
                 exit={{ width: 0, opacity: 0 }}
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className={`shrink-0 border-r select-none h-full lg:sticky lg:top-[75px] overflow-y-auto max-h-[calc(100vh-75px)] p-5.5 space-y-6 ${
-                  isLightMode 
-                    ? 'bg-neutral-100 border-neutral-200' 
-                    : 'bg-neutral-900/40 backdrop-blur-3xl border-neutral-900'
-                }`}
+                transition={{ duration: 0.2 }}
+                style={{
+                  backgroundColor: 'var(--notion-bg-secondary)',
+                  borderColor: 'var(--notion-border)',
+                  borderRight: '1px solid var(--n-border)'
+                }}
+                className="shrink-0 border-r select-none h-full lg:sticky lg:top-[75px] overflow-y-auto max-h-[calc(100vh-75px)] p-2 space-y-4"
               >
                 {/* 1. Project workspace switch section */}
-                <div className="space-y-3.5">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-mono uppercase tracking-widest font-extrabold flex items-center gap-1 ${
-                      isLightMode ? 'text-neutral-500' : 'text-neutral-450'
-                    }`}>
-                      <FileText className="w-3.5 h-3.5 text-blue-500" /> Active Workspace ({projects.length})
-                    </span>
+                <div className="flex flex-col">
+                  <div className="flex items-center justify-between px-3 pt-3 pb-1 select-none shrink-0 text-[11px] uppercase tracking-wider text-stone-500 font-medium">
+                    <span style={{ color: 'var(--notion-text-tertiary)', letterSpacing: '0.06em' }}>Active workspace</span>
                     <button
+                      type="button"
                       onClick={() => setShowNewProjectForm(!showNewProjectForm)}
-                      className="p-1 rounded-lg hover:bg-neutral-500/10 text-blue-500 cursor-pointer"
-                      title="New Project"
+                      className="w-5 h-5 flex items-center justify-center rounded hover:bg-[var(--notion-bg-hover)] cursor-pointer text-stone-500 outline-none border-none bg-transparent"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -1084,54 +1041,56 @@ export default function App() {
                   {showNewProjectForm && (
                     <form 
                       onSubmit={handleCreateNewProjectFromScratch}
-                      className={`p-3 rounded-2xl border space-y-2.5 transition animate-fadeIn ${
-                        isLightMode ? 'bg-white border-neutral-255' : 'bg-neutral-950/80 border-neutral-800'
-                      }`}
+                      className="p-3 mx-2 my-1 rounded border space-y-2 transition animate-fadeIn"
+                      style={{
+                        backgroundColor: 'var(--notion-bg-primary)',
+                        borderColor: 'var(--notion-border)'
+                      }}
                     >
-                      <p className="text-[9px] font-mono font-bold text-neutral-500 uppercase">Initialize Project Workspace</p>
+                      <p className="text-[10px] font-mono font-bold text-stone-500 uppercase">New Workspace</p>
                       <input
                         type="text"
-                        className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-550 ${
-                          isLightMode ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-900 border-neutral-805 text-white'
-                        }`}
-                        placeholder="e.g. Fitbit Runs API Integrator"
+                        className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                        style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
+                        placeholder="Project name..."
                         value={newProjectName}
                         onChange={(e) => setNewProjectName(e.target.value)}
                         required
                       />
                       <input
                         type="text"
-                        className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-550 ${
-                          isLightMode ? 'bg-neutral-50 border-neutral-200' : 'bg-neutral-900 border-neutral-805 text-white'
-                        }`}
-                        placeholder="Project description objective..."
+                        className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                        style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
+                        placeholder="Description..."
                         value={newProjectDesc}
                         onChange={(e) => setNewProjectDesc(e.target.value)}
                       />
 
                       {/* Presets segment toggle */}
-                      <div className="grid grid-cols-2 gap-1.5 p-0.5 rounded-lg bg-neutral-500/10 text-[10px] font-medium font-mono text-center">
+                      <div className="grid grid-cols-2 gap-1 p-0.5 rounded bg-[var(--notion-bg-hover)] text-[10px] font-medium font-mono text-center">
                         <button
                           type="button"
                           onClick={() => setProjectPreset('blueprint')}
-                          className={`py-1 rounded-md cursor-pointer ${
+                          className={`py-1 rounded cursor-pointer ${
                             projectPreset === 'blueprint' 
-                              ? isLightMode ? 'bg-white text-neutral-900 shadow' : 'bg-neutral-800 text-white shadow'
-                              : 'text-neutral-500 hover:text-neutral-350'
+                              ? 'bg-[var(--notion-bg-primary)] shadow-xs font-semibold' 
+                              : 'opacity-60'
                           }`}
+                          style={{ color: 'var(--notion-text-primary)' }}
                         >
-                          Use Blueprint
+                          Blueprint
                         </button>
                         <button
                           type="button"
                           onClick={() => setProjectPreset('empty')}
-                          className={`py-1 rounded-md cursor-pointer ${
+                          className={`py-1 rounded cursor-pointer ${
                             projectPreset === 'empty'
-                              ? isLightMode ? 'bg-white text-neutral-900 shadow' : 'bg-neutral-800 text-white shadow'
-                              : 'text-neutral-500 hover:text-neutral-350'
+                              ? 'bg-[var(--notion-bg-primary)] shadow-xs font-semibold'
+                              : 'opacity-60'
                           }`}
+                          style={{ color: 'var(--notion-text-primary)' }}
                         >
-                          From Scratch
+                          Scratch
                         </button>
                       </div>
 
@@ -1139,48 +1098,53 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => setShowNewProjectForm(false)}
-                          className="px-2.5 py-1.5 rounded-lg bg-neutral-500/10 text-neutral-400"
+                          className="px-2 py-1 rounded bg-[var(--notion-bg-hover)]"
+                          style={{ color: 'var(--notion-text-secondary)' }}
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-2.5 py-1.5 rounded-lg bg-blue-600 text-white font-bold"
+                          className="px-2 py-1 rounded text-white font-semibold"
+                          style={{ backgroundColor: 'var(--notion-accent-blue)' }}
                         >
-                          Start Project
+                          Start
                         </button>
                       </div>
                     </form>
                   )}
 
                   {/* List of active projects toggle buttons */}
-                  <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin">
+                  <div className="space-y-[2px] max-h-[140px] overflow-y-auto px-1 py-1 scrollbar-none">
                     {projects.map(p => {
                       const isActive = p.id === activeProject.id;
                       return (
                         <div
                           key={p.id}
                           onClick={() => handleSelectActiveProject(p.id)}
-                          className={`p-2.5 rounded-2xl border text-left cursor-pointer transition flex items-center justify-between gap-3 ${
-                            isActive
-                              ? isLightMode 
-                                ? 'bg-white border-neutral-300 shadow-xs' 
-                                : 'bg-neutral-800 border-neutral-700 text-white'
-                              : isLightMode
-                              ? 'bg-transparent border-transparent hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900'
-                              : 'bg-transparent border-transparent hover:bg-neutral-850/40 text-neutral-400 hover:text-white'
-                          }`}
+                          className="group flex items-center justify-between gap-2 h-7 px-2 rounded cursor-pointer transition-colors duration-100 select-none text-[13px]"
+                          style={{
+                            backgroundColor: isActive ? 'var(--notion-bg-selected)' : 'transparent',
+                            color: isActive ? 'var(--notion-text-primary)' : 'var(--notion-text-secondary)',
+                            fontWeight: isActive ? 500 : 400
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isActive) e.currentTarget.style.backgroundColor = 'var(--notion-bg-hover)';
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
+                          }}
                         >
-                          <div className="flex-1 min-w-0 pr-1">
-                            <span className="text-xs font-bold font-sans truncate block">{p.name}</span>
-                            <span className="text-[9px] font-mono text-neutral-550 block truncate">{p.description}</span>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <FileText className="w-3.5 h-3.5 shrink-0" style={{ color: 'inherit' }} />
+                            <span className="truncate flex-1 text-left">{p.name}</span>
                           </div>
                           
                           {/* Close Project Button */}
                           {projects.length > 1 && (
                             <button
                               onClick={(e) => handleDeleteProject(p.id, e)}
-                              className="p-1 rounded text-neutral-500 hover:text-rose-500 hover:bg-rose-500/10/10"
+                              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-[var(--notion-bg-hover)] text-stone-400 hover:text-stone-750 dark:hover:text-stone-300 outline-none border-none bg-transparent cursor-pointer transition-all duration-100"
                               title="Delete workspace project permanently"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -1193,49 +1157,69 @@ export default function App() {
                 </div>
 
                 {/* 2. Operations tab configurations */}
-                <div className="space-y-2 border-t pt-4 border-neutral-500/10">
-                  <span className={`text-[10px] font-mono uppercase tracking-widest font-extrabold flex items-center gap-1 ${
-                    isLightMode ? 'text-neutral-500' : 'text-neutral-450'
-                  }`}>
-                    <Settings className="w-3.5 h-3.5 text-neutral-400" /> Administrative Tuning
-                  </span>
+                <div className="flex flex-col">
+                  {/* Flat Section Divider Header */}
+                  <div className="px-3 pt-3 pb-1 select-none text-[11px] uppercase tracking-wider text-stone-500 font-medium" style={{ color: 'var(--notion-text-tertiary)', letterSpacing: '0.06em' }}>
+                    Administrative Tuning
+                  </div>
 
-                  <div className="grid grid-cols-3 gap-1 grid-flow-row">
-                    <button
+                  <div className="space-y-[2px] px-1 py-1">
+                    {/* Phases button row */}
+                    <div
                       onClick={() => setCurrentAdminTab(currentAdminTab === 'phases' ? 'none' : 'phases')}
-                      className={`p-1.5 py-2 text-[10px] font-mono rounded-xl border flex flex-col items-center justify-center gap-1 cursor-pointer transition ${
-                        currentAdminTab === 'phases'
-                          ? isLightMode ? 'bg-white border-neutral-300 shadow-sm text-neutral-950 font-bold' : 'bg-neutral-800 border-neutral-700 text-white font-bold'
-                          : isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-neutral-800' : 'bg-neutral-950 border-neutral-805 text-neutral-450 hover:text-neutral-200'
-                      }`}
+                      className="flex items-center gap-2 h-7 px-2 rounded cursor-pointer transition-colors duration-100 text-[13px]"
+                      style={{
+                        backgroundColor: currentAdminTab === 'phases' ? 'var(--notion-bg-selected)' : 'transparent',
+                        color: currentAdminTab === 'phases' ? 'var(--notion-text-primary)' : 'var(--notion-text-secondary)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (currentAdminTab !== 'phases') e.currentTarget.style.backgroundColor = 'var(--notion-bg-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (currentAdminTab !== 'phases') e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
-                      <Layers className="w-4 h-4 text-blue-500" />
-                      <span>Phases</span>
-                    </button>
+                      <Layers className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                      <span className="flex-1 text-left">Phases</span>
+                    </div>
 
-                    <button
+                    {/* Roster button row */}
+                    <div
                       onClick={() => setCurrentAdminTab(currentAdminTab === 'team' ? 'none' : 'team')}
-                      className={`p-1.5 py-2 text-[10px] font-mono rounded-xl border flex flex-col items-center justify-center gap-1 cursor-pointer transition ${
-                        currentAdminTab === 'team'
-                          ? isLightMode ? 'bg-white border-neutral-300 shadow-sm text-neutral-950 font-bold' : 'bg-neutral-800 border-neutral-700 text-white font-bold'
-                          : isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-neutral-800' : 'bg-neutral-950 border-neutral-805 text-neutral-450 hover:text-neutral-200'
-                      }`}
+                      className="flex items-center gap-2 h-7 px-2 rounded cursor-pointer transition-colors duration-100 text-[13px]"
+                      style={{
+                        backgroundColor: currentAdminTab === 'team' ? 'var(--notion-bg-selected)' : 'transparent',
+                        color: currentAdminTab === 'team' ? 'var(--notion-text-primary)' : 'var(--notion-text-secondary)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (currentAdminTab !== 'team') e.currentTarget.style.backgroundColor = 'var(--notion-bg-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (currentAdminTab !== 'team') e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
-                      <Users className="w-4 h-4 text-emerald-500" />
-                      <span>Roster</span>
-                    </button>
+                      <Users className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span className="flex-1 text-left">Roster</span>
+                    </div>
 
-                    <button
+                    {/* Import button row */}
+                    <div
                       onClick={() => setCurrentAdminTab(currentAdminTab === 'import-export' ? 'none' : 'import-export')}
-                      className={`p-1.5 py-2 text-[10px] font-mono rounded-xl border flex flex-col items-center justify-center gap-1 cursor-pointer transition ${
-                        currentAdminTab === 'import-export'
-                          ? isLightMode ? 'bg-white border-neutral-300 shadow-sm text-neutral-950 font-bold' : 'bg-neutral-800 border-neutral-700 text-white font-bold'
-                          : isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-neutral-800' : 'bg-neutral-950 border-neutral-805 text-neutral-450 hover:text-neutral-200'
-                      }`}
+                      className="flex items-center gap-2 h-7 px-2 rounded cursor-pointer transition-colors duration-100 text-[13px]"
+                      style={{
+                        backgroundColor: currentAdminTab === 'import-export' ? 'var(--notion-bg-selected)' : 'transparent',
+                        color: currentAdminTab === 'import-export' ? 'var(--notion-text-primary)' : 'var(--notion-text-secondary)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (currentAdminTab !== 'import-export') e.currentTarget.style.backgroundColor = 'var(--notion-bg-hover)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (currentAdminTab !== 'import-export') e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
                     >
-                      <Upload className="w-4 h-4 text-purple-555 text-purple-400" />
-                      <span>Import</span>
-                    </button>
+                      <Upload className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span className="flex-1 text-left">Import</span>
+                    </div>
                   </div>
                 </div>
 
@@ -1244,49 +1228,48 @@ export default function App() {
                   {currentAdminTab !== 'none' && (
                     <motion.div
                       key={currentAdminTab}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className={`p-4 rounded-2xl border space-y-3.5 ${
-                        isLightMode ? 'bg-white border-neutral-200 shadow-xs' : 'bg-neutral-950/60 border-neutral-805'
-                      }`}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.15 }}
+                      className="p-3 mx-1.5 rounded border space-y-3 transition"
+                      style={{
+                        backgroundColor: 'var(--notion-bg-primary)',
+                        borderColor: 'var(--notion-border)'
+                      }}
                     >
                       {/* SUB SECTION: PHASES */}
                       {currentAdminTab === 'phases' && (
                         <div className="space-y-3">
                           <div>
-                            <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase">Focus Phase Groups ({activeProject.categories.length})</span>
-                            <span className="block text-[8px] italic text-neutral-400">Add or edit development focus milestones.</span>
+                            <span className="text-[11px] font-mono font-bold text-stone-500 uppercase">Focus Phase Groups ({activeProject.categories.length})</span>
+                            <span className="block text-[11px] italic mt-0.5" style={{ color: 'var(--notion-text-secondary)' }}>Add or edit development focus milestones.</span>
                           </div>
 
-                          <form onSubmit={handleAddPhase} className="space-y-2">
+                          <form onSubmit={handleAddPhase} className="space-y-1.5 text-[13px]">
                             <input
                               type="text"
-                              className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-500 ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                              }`}
-                              placeholder="Phase Name (e.g., QA Staging)"
+                              className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
+                              placeholder="Phase Name (e.g. QA Staging)"
                               value={phaseName}
                               onChange={(e) => setPhaseName(e.target.value)}
                               required
                             />
                             <input
                               type="text"
-                              className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-500 ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                              }`}
+                              className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
                               placeholder="Brief phase objective description"
                               value={phaseDesc}
                               onChange={(e) => setPhaseDesc(e.target.value)}
                             />
 
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-2 gap-1.5">
                               {/* Icon list dropdown selector */}
                               <select
-                                className={`text-[10px] font-mono p-2 rounded-xl border cursor-pointer ${
-                                  isLightMode ? 'bg-neutral-50 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                                }`}
+                                className="text-[11px] font-mono p-1 rounded border cursor-pointer bg-transparent h-8"
+                                style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)', backgroundColor: 'var(--notion-bg-primary)' }}
                                 value={phaseIcon}
                                 onChange={(e) => setPhaseIcon(e.target.value)}
                               >
@@ -1300,9 +1283,8 @@ export default function App() {
 
                               {/* Colors list selector */}
                               <select
-                                className={`text-[10px] font-mono p-2 rounded-xl border cursor-pointer ${
-                                  isLightMode ? 'bg-neutral-50 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                                }`}
+                                className="text-[11px] font-mono p-1 rounded border cursor-pointer bg-transparent h-8"
+                                style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)', backgroundColor: 'var(--notion-bg-primary)' }}
                                 value={phaseColor}
                                 onChange={(e) => setPhaseColor(e.target.value)}
                               >
@@ -1316,23 +1298,25 @@ export default function App() {
 
                             <button
                               type="submit"
-                              className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition"
+                              className="w-full h-8 text-white rounded text-xs font-semibold cursor-pointer border-none"
+                              style={{ backgroundColor: 'var(--notion-accent-blue)' }}
                             >
                               Deploy Focus Phase
                             </button>
                           </form>
 
                           {/* List of active project focus groups */}
-                          <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin border-t pt-2 border-neutral-500/10">
+                          <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-none border-t pt-2" style={{ borderColor: 'var(--notion-border)' }}>
                             {activeProject.categories.map(c => (
-                              <div key={c.id} className="text-[10px] flex items-center justify-between p-1.5 rounded-lg hover:bg-neutral-500/5">
-                                <div className="truncate pr-1">
-                                  <span className={`font-bold block text-neutral-300 truncate leading-none ${isLightMode ? 'text-neutral-800' : 'text-neutral-200'}`}>{c.name}</span>
-                                  <span className="text-[8px] font-mono text-neutral-500 tracking-wider truncate uppercase">{c.id}</span>
+                              <div key={c.id} className="text-[12px] flex items-center justify-between p-1.5 rounded hover:bg-[var(--notion-bg-hover)]">
+                                <div className="truncate pr-1 flex flex-col items-start leading-none">
+                                  <span className="font-semibold block truncate text-[12px]" style={{ color: 'var(--notion-text-primary)' }}>{c.name}</span>
+                                  <span className="text-[10px] font-mono tracking-wider truncate uppercase mt-0.5 text-stone-500">{c.id}</span>
                                 </div>
                                 <button
+                                  type="button"
                                   onClick={() => handleDeletePhase(c.id)}
-                                  className="text-[9px] text-neutral-500 hover:text-rose-500 p-1 shrink-0"
+                                  className="text-[11px] text-stone-500 hover:text-rose-500 p-1 shrink-0 bg-transparent border-none cursor-pointer"
                                 >
                                   Del
                                 </button>
@@ -1346,16 +1330,15 @@ export default function App() {
                       {currentAdminTab === 'team' && (
                         <div className="space-y-3">
                           <div>
-                            <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase">Operational Work Crew ({activeProject.team.length})</span>
-                            <span className="block text-[8px] italic text-neutral-400">Add teammates to delegate compliance standards list.</span>
+                            <span className="text-[11px] font-mono font-bold text-stone-500 uppercase">Operational Work Crew ({activeProject.team.length})</span>
+                            <span className="block text-[11px] italic mt-0.5" style={{ color: 'var(--notion-text-secondary)' }}>Add teammates to delegate compliance standards list.</span>
                           </div>
 
-                          <form onSubmit={handleAddTeammate} className="space-y-2">
+                          <form onSubmit={handleAddTeammate} className="space-y-1.5">
                             <input
                               type="text"
-                              className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-500 ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                              }`}
+                              className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
                               placeholder="Full Name (e.g. Marcus Vance)"
                               value={memberName}
                               onChange={(e) => setMemberName(e.target.value)}
@@ -1363,9 +1346,8 @@ export default function App() {
                             />
                             <input
                               type="text"
-                              className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-500 ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                              }`}
+                              className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
                               placeholder="Project Position (e.g. DevOps Senior)"
                               value={memberRole}
                               onChange={(e) => setMemberRole(e.target.value)}
@@ -1373,9 +1355,8 @@ export default function App() {
                             />
                             <input
                               type="email"
-                              className={`w-full text-xs font-sans p-2 rounded-xl outline-none border focus:border-blue-500 ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-900' : 'bg-neutral-900 border-neutral-805 text-white'
-                              }`}
+                              className="w-full text-xs p-2 rounded outline-none border focus:border-[var(--notion-accent-blue)] bg-transparent font-sans h-8"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
                               placeholder="Delegate email (optional)"
                               value={memberEmail}
                               onChange={(e) => setMemberEmail(e.target.value)}
@@ -1383,9 +1364,8 @@ export default function App() {
 
                             {/* Avatar selector options */}
                             <select
-                              className={`w-full text-[10px] font-mono p-2 rounded-xl border cursor-pointer ${
-                                isLightMode ? 'bg-neutral-50 text-neutral-900' : 'bg-neutral-900 border-neutral-850 text-white'
-                              }`}
+                              className="w-full text-[11px] font-mono p-1 rounded border cursor-pointer bg-transparent h-8"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)', backgroundColor: 'var(--notion-bg-primary)' }}
                               value={memberAvatar}
                               onChange={(e) => setMemberAvatar(e.target.value)}
                             >
@@ -1398,28 +1378,30 @@ export default function App() {
 
                             <button
                               type="submit"
-                              className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition"
+                              className="w-full h-8 text-white rounded text-xs font-semibold cursor-pointer border-none"
+                              style={{ backgroundColor: 'var(--notion-green)' }}
                             >
                               Register Collaborator
                             </button>
                           </form>
 
                           {/* Crew member listings list */}
-                          <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin border-t pt-2 border-neutral-500/10">
+                          <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-none border-t pt-2" style={{ borderColor: 'var(--notion-border)' }}>
                             {activeProject.team.map(m => (
-                              <div key={m.id} className="text-[10px] flex items-center justify-between p-1.5 rounded-lg hover:bg-neutral-500/5">
+                              <div key={m.id} className="text-[12px] flex items-center justify-between p-1.5 rounded hover:bg-[var(--notion-bg-hover)]">
                                 <div className="flex items-center gap-2 truncate">
-                                  <div className={`w-5 h-5 rounded-full ${m.avatarColor} text-white font-mono flex items-center justify-center font-black text-[7px] shrink-0`}>
+                                  <div className={`w-5 h-5 rounded-full ${m.avatarColor} text-white font-mono flex items-center justify-center font-bold text-[8px] shrink-0`}>
                                     {m.name.split(' ').map(n=>n[0]).join('')}
                                   </div>
-                                  <div className="truncate pr-1">
-                                    <span className={`font-bold block text-neutral-300 leading-none truncate ${isLightMode ? 'text-neutral-850' : 'text-neutral-200'}`}>{m.name}</span>
-                                    <span className="text-[8px] font-mono text-neutral-500 leading-none block truncate">{m.role}</span>
+                                  <div className="truncate pr-1 flex flex-col items-start leading-none">
+                                    <span className="font-semibold block truncate text-[12px]" style={{ color: 'var(--notion-text-primary)' }}>{m.name}</span>
+                                    <span className="text-[9px] mt-0.5 block truncate text-stone-500">{m.role}</span>
                                   </div>
                                 </div>
                                 <button
+                                  type="button"
                                   onClick={() => handleDeleteTeammate(m.id)}
-                                  className="text-[9px] text-neutral-500 hover:text-rose-500 p-1 shrink-0"
+                                  className="text-[11px] text-stone-500 hover:text-rose-500 p-1 shrink-0 bg-transparent border-none cursor-pointer"
                                 >
                                   Del
                                 </button>
@@ -1433,34 +1415,36 @@ export default function App() {
                       {currentAdminTab === 'import-export' && (
                         <div className="space-y-3">
                           <div>
-                            <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase">JSON Checklist Porting</span>
-                            <span className="block text-[8px] italic text-neutral-400">Import checklists from scratch or backup current settings.</span>
+                            <span className="text-[11px] font-mono font-bold text-stone-500 uppercase">JSON Checklist Porting</span>
+                            <span className="block text-[11px] italic mt-0.5" style={{ color: 'var(--notion-text-secondary)' }}>Import checklists from scratch or backup current settings.</span>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-1.5">
                             <button
+                              type="button"
                               onClick={copyTemplateJSON}
-                              className={`flex-1 p-2 text-[9px] font-mono font-bold rounded-xl flex items-center justify-center gap-1 border cursor-pointer hover:bg-neutral-500/5 ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-600' : 'bg-neutral-900 border-neutral-850 text-neutral-400'
-                              }`}
+                              className="flex-1 h-7 text-[10px] font-mono font-bold rounded flex items-center justify-center gap-1 border cursor-pointer hover:bg-[var(--notion-bg-hover)] bg-transparent"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-secondary)' }}
                             >
-                              <Copy className="w-3.5 h-3.5" /> Template
+                              <Copy className="w-3 h-3" /> Template
                             </button>
 
                             <button
+                              type="button"
                               onClick={exportProjectToJSON}
-                              className="flex-1 p-2 text-[9px] font-mono font-bold rounded-xl flex items-center justify-center gap-1 border cursor-pointer hover:bg-neutral-500/5 bg-blue-600 text-white border-blue-500"
+                              className="flex-1 h-7 text-[10px] font-mono font-medium rounded flex items-center justify-center gap-1 cursor-pointer hover:opacity-90 text-white border-none"
+                              style={{ backgroundColor: 'var(--notion-accent-blue)' }}
                             >
-                              <Download className="w-3.5 h-3.5" /> Export DB
+                              <Download className="w-3 h-3" /> Export DB
                             </button>
                           </div>
 
                           {/* drag and drop file simulation container */}
                           <div 
+                            type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer hover:border-blue-500 hover:bg-neutral-500/5 transition duration-150 ${
-                              isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-500' : 'bg-neutral-900 border-neutral-805 text-neutral-450'
-                            }`}
+                            className="border border-dashed rounded p-3 text-center cursor-pointer hover:bg-[var(--notion-bg-hover)] transition duration-150"
+                            style={{ borderColor: 'var(--notion-border)' }}
                           >
                             <input
                               type="file"
@@ -1469,18 +1453,17 @@ export default function App() {
                               className="hidden"
                               accept=".json"
                             />
-                            <Upload className="w-5 h-5 mx-auto mb-1.5 text-neutral-500" />
-                            <span className="text-[10px] font-mono block font-bold">Select .json standards file</span>
-                            <span className="text-[8px] block text-neutral-500 leading-none mt-1">Accepts project-preset schema file backups</span>
+                            <Upload className="w-4 h-4 mx-auto mb-1 text-natural-500" style={{ color: 'var(--notion-text-secondary)' }} />
+                            <span className="text-[10px] font-mono block font-bold" style={{ color: 'var(--notion-text-primary)' }}>Select .json file</span>
+                            <span className="text-[8px] block leading-none mt-1" style={{ color: 'var(--notion-text-tertiary)' }}>Accepts raw standards files</span>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <span className="text-[8px] font-mono text-neutral-500 uppercase block font-bold">Paste Raw JSON data standards</span>
+                          <div className="space-y-1">
+                            <span className="text-[8px] font-mono uppercase block font-bold" style={{ color: 'var(--notion-text-secondary)' }}>Paste Raw JSON data standards</span>
                             <textarea
-                              rows={4}
-                              className={`w-full font-mono text-[9px] rounded-xl p-2 outline-none border focus:border-blue-500 resize-none ${
-                                isLightMode ? 'bg-neutral-50 border-neutral-200 text-neutral-900' : 'bg-neutral-900/60 border-neutral-850 text-emerald-450 dark:text-emerald-400'
-                              }`}
+                              rows={3}
+                              className="w-full font-mono text-[9px] rounded p-1.5 outline-none border focus:border-[var(--notion-accent-blue)] resize-none bg-transparent"
+                              style={{ borderColor: 'var(--notion-border)', color: 'var(--notion-text-primary)' }}
                               placeholder='{"name": "My project", "items": [{"title": "CSRF"}]}'
                               value={jsonImportText}
                               onChange={(e) => setJsonImportText(e.target.value)}
@@ -1488,11 +1471,13 @@ export default function App() {
                           </div>
 
                           <button
+                            type="button"
                             onClick={() => handleJSONImportSubmit()}
-                            className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition disabled:opacity-40"
+                            className="w-full h-8 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-40 border-none"
+                            style={{ backgroundColor: 'var(--notion-accent-blue)' }}
                             disabled={!jsonImportText.trim()}
                           >
-                            Execute Import Standard Checked
+                            Execute Import Standard
                           </button>
                         </div>
                       )}
@@ -1502,45 +1487,42 @@ export default function App() {
                 </AnimatePresence>
 
                 {/* 3. Team online sharing orchestration magic */}
-                <div className="space-y-3.5 border-t pt-4 border-neutral-500/10">
-                  <span className={`text-[10px] font-mono uppercase tracking-widest font-extrabold flex items-center gap-1 ${
-                    isLightMode ? 'text-neutral-500' : 'text-neutral-450'
-                  }`}>
-                    <Share2 className="w-3.5 h-3.5 text-blue-500" /> Live Team Orchestration
-                  </span>
+                <div className="flex flex-col pt-2">
+                  {/* Flat Section Divider Header */}
+                  <div className="px-3 pt-3 pb-1 select-none text-[11px] uppercase tracking-wider text-stone-500 font-medium" style={{ color: 'var(--notion-text-tertiary)', letterSpacing: '0.06em' }}>
+                    Live Team Orchestration
+                  </div>
 
-                  <div className={`p-4 rounded-3xl border space-y-3.5 relative overflow-hidden ${
-                    isLightMode 
-                      ? 'bg-neutral-50 border-neutral-250' 
-                      : 'bg-radial from-neutral-950/80 to-transparent border-neutral-805'
-                  }`}>
-                    <p className={`text-[10px] font-mono leading-normal italic ${
-                      isLightMode ? 'text-neutral-550' : 'text-neutral-450'
-                    }`}>
-                      "Stupid simple link coordination." Compile active specifications, item completions, and assignment roster into a fully portable Magic Sync URL, immediately shareable over workspace networks or direct emails!
+                  <div className="px-3 py-1.5 space-y-2.5">
+                    <p className="text-[13px] leading-relaxed text-left select-none" style={{ color: 'var(--notion-text-secondary)' }}>
+                      Compile active specs and dispatch roster email.
                     </p>
 
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-1.5 border-none bg-transparent">
+                      {/* Dispatch roster email: standard secondary button */}
                       <button
                         onClick={handleSendDynamicTeamInvitationEmail}
-                        className={`w-full py-2.5 rounded-2xl text-[11px] font-bold tracking-tight text-white flex items-center justify-center gap-2 cursor-pointer shadow border border-rose-500/20 bg-rose-500 hover:scale-[1.01] transition duration-200`}
+                        className="w-full h-8 text-[12px] font-medium tracking-tight rounded cursor-pointer transition duration-125 text-stone-700 dark:text-stone-300 border hover:bg-[var(--notion-bg-hover)] flex items-center justify-center gap-1.5"
+                        style={{
+                          borderColor: 'var(--notion-border)',
+                          backgroundColor: 'transparent',
+                          color: 'var(--notion-text-primary)'
+                        }}
                       >
-                        <Mail className="w-3.5 h-3.5 text-white" />
+                        <Mail className="w-3.5 h-3.5" />
                         <span>Dispatch Roster Email</span>
                       </button>
 
+                      {/* Copy live magic link: ghost text link (no border, no bg unless hover) */}
                       <button
                         onClick={handleGenerateMagicShareLink}
-                        className={`w-full py-2.5 rounded-2xl text-[11px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer border hover:scale-[1.01] transition duration-200 ${
-                          copiedLink 
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
-                            : isLightMode 
-                            ? 'bg-white hover:bg-neutral-50 border-neutral-250 text-neutral-700' 
-                            : 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-indigo-400'
-                        }`}
+                        className="w-full h-8 text-[12px] font-medium tracking-tight rounded cursor-pointer transition duration-125 flex items-center justify-center gap-1.5 border-none bg-transparent hover:bg-[var(--notion-bg-hover)]"
+                        style={{
+                          color: copiedLink ? 'var(--notion-green)' : 'var(--notion-text-primary)'
+                        }}
                       >
                         {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedLink ? "Link Placed in Clipboard!" : "Copy Live Magic Link"}</span>
+                        <span>{copiedLink ? "Link Placed in Clipboard!" : "Copy Magic Link"}</span>
                       </button>
                     </div>
                   </div>
@@ -1718,6 +1700,10 @@ export default function App() {
                 onDelete={handleDeleteTask}
                 onMoveStatus={handleMoveStatus}
                 isLightMode={isLightMode}
+                onNewCard={(status) => {
+                  setTaskToEdit(null);
+                  setIsAddModalOpen(true);
+                }}
               />
             </div>
 

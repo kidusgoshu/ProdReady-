@@ -1,10 +1,6 @@
 import React from 'react';
 import { Stats, CategoryInfo, ChecklistItem, Teammate } from '../types';
-import { 
-  Shield, Server, Code2, CheckSquare, Database, FileText, 
-  AlertCircle, CheckCircle2, Circle, TrendingUp, Users,
-  Layers, Cpu, Globe, Lock, Settings, Terminal
-} from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 interface StatsSectionProps {
   stats: Stats;
@@ -20,6 +16,12 @@ interface StatsSectionProps {
   };
   onAssignClick?: (memberId: string) => void;
 }
+
+// Map icons cleanly
+import { 
+  Server, Code2, CheckSquare, Database, FileText, 
+  Layers, Cpu, Globe, Lock, Settings, Terminal
+} from 'lucide-react';
 
 const categoryIcons: Record<string, React.ComponentType<any>> = {
   Shield,
@@ -43,12 +45,10 @@ export default function StatsSection({
   team,
   onSelectCategory, 
   selectedCategory,
-  isLightMode,
-  accent,
   onAssignClick
 }: StatsSectionProps) {
   
-  // Calculate category-specific progress dynamically based on project defined focus subgroups
+  // Calculate category-specific progress dynamically
   const categoryStats = categories.map(cat => {
     const catItems = items.filter(item => item.category === cat.id);
     const total = catItems.length;
@@ -76,116 +76,116 @@ export default function StatsSection({
     };
   });
 
-  // SVG parameters for standard circle gauge
-  const radius = 48;
-  const strokeWidth = 9;
-  const circumference = 2 * Math.PI * radius;
-  const fillOffset = circumference - (stats.progressPercentage / 100) * circumference;
-
   return (
     <div id="stats-section-container" className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       
       {/* =========================================================================
-          COLUMN 1: DYNAMIC OVERALL PROGRESS RADIAL WIDGET
+          COLUMN 1: PROJECT VELOCITY CARD (Notion Property Panel Style)
           ========================================================================= */}
       <div 
         id="overall-progress-card" 
-        className={`rounded-3xl p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group shadow-lg transition duration-300 border ${
-          isLightMode 
-            ? 'bg-white border-neutral-200/95 shadow-neutral-100' 
-            : 'bg-neutral-900/60 backdrop-blur-xl border-neutral-800/80'
-        }`}
+        className="p-4 border transition-all duration-300 rounded-[6px] flex flex-col justify-between"
+        style={{
+          backgroundColor: 'var(--notion-bg-secondary)',
+          borderColor: 'var(--notion-border)',
+          minHeight: '190px'
+        }}
       >
-        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl group-hover:opacity-100 transition-all duration-700 ${
-          isLightMode ? 'bg-blue-500/5 group-hover:bg-blue-500/10' : 'bg-emerald-500/10 group-hover:bg-emerald-500/20'
-        }`} />
-        
-        <div className="flex flex-col space-y-2 text-center md:text-left z-10">
-          <span className={`text-[10px] font-mono uppercase tracking-widest font-extrabold ${
-            isLightMode ? 'text-neutral-450' : 'text-neutral-500'
-          }`}>Ready Quotient</span>
-          <h2 className={`text-2xl font-black tracking-tight font-sans ${
-            isLightMode ? 'text-neutral-900' : 'text-white'
-          }`}>Project Velocity</h2>
-          <p className={`text-xs max-w-[190px] leading-relaxed ${
-            isLightMode ? 'text-neutral-600' : 'text-neutral-400'
-          }`}>
+        <div className="flex flex-col space-y-1.5">
+          <span 
+            style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: 'var(--n-tx3)',
+              marginBottom: '12px',
+              display: 'block'
+            }}
+          >
+            PROJECT VELOCITY
+          </span>
+          <div className="flex items-baseline gap-2">
+            <span 
+              style={{
+                fontSize: '28px',
+                fontWeight: 600,
+                color: 'var(--notion-text-primary)'
+              }}
+            >
+              {stats.progressPercentage}%
+            </span>
+            <span 
+              style={{
+                fontSize: '11px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--notion-text-tertiary)',
+                fontWeight: 500
+              }}
+            >
+              Overall
+            </span>
+          </div>
+          <p style={{ fontSize: '12px', color: 'var(--notion-text-secondary)', lineHeight: '1.4' }}>
             {stats.progressPercentage === 100 
-              ? "100% production certified! Launch instantly." 
-              : stats.progressPercentage > 75 
-              ? "Vibe checks robust! Secure final deployment thresholds."
-              : stats.progressPercentage > 40
-              ? "Midway verification active. Core safeguards locked."
-              : "Early staging. Defining essential validation parameters."}
+              ? "All specifications fully certified." 
+              : `${stats.progressPercentage}% development checks completed successfully.`}
           </p>
         </div>
 
-        {/* Circular Progress Gauge */}
-        <div className="relative flex items-center justify-center w-32 h-32 z-10 select-none">
-          <svg className="w-full h-full transform -rotate-90">
-            {/* Background ring */}
-            <circle
-              cx="64"
-              cy="64"
-              r={radius}
-              className={isLightMode ? 'stroke-neutral-100' : 'stroke-neutral-850'}
-              strokeWidth={strokeWidth}
-              fill="transparent"
-            />
-            {/* Fill ring with selected accent path */}
-            <circle
-              cx="64"
-              cy="64"
-              r={radius}
-              className={`transition-all duration-1000 ease-out ${
-                isLightMode ? 'stroke-blue-600' : 'stroke-emerald-500'
-              }`}
-              strokeWidth={strokeWidth}
-              fill="transparent"
-              strokeDasharray={circumference}
-              strokeDashoffset={fillOffset}
-              strokeLinecap="round"
-            />
-          </svg>
-          <div className="absolute flex flex-col items-center justify-center">
-            <span className={`text-2xl font-black font-mono tracking-tight ${
-              isLightMode ? 'text-neutral-900' : 'text-white'
-            }`}>{stats.progressPercentage}%</span>
-            <span className={`text-[8px] font-mono uppercase tracking-wider font-bold ${
-              isLightMode ? 'text-neutral-550' : 'text-neutral-500'
-            }`}>Overall</span>
-          </div>
+        {/* Horizontal Progress Bar */}
+        <div 
+          style={{
+            width: '100%',
+            height: '4px',
+            background: 'var(--n-hover)',
+            borderRadius: '2px',
+            marginTop: '16px',
+            overflow: 'hidden'
+          }}
+        >
+          <div 
+            style={{
+              width: `${stats.progressPercentage}%`,
+              height: '100%',
+              background: 'var(--n-blue)',
+              borderRadius: '2px',
+              transition: 'width 0.4s ease-in-out'
+            }}
+          />
         </div>
       </div>
 
       {/* =========================================================================
-          COLUMN 2: DYNAMIC ACTIVE PHASES SUMMARY
+          COLUMN 2: FOCUS PHASES SUMMARY
           ========================================================================= */}
       <div 
         id="category-stats-card" 
-        className={`rounded-3xl p-5 flex flex-col justify-between shadow-lg transition duration-300 border ${
-          isLightMode 
-            ? 'bg-white border-neutral-200/90 hover:border-neutral-300' 
-            : 'bg-neutral-900/60 backdrop-blur-xl border-neutral-800/85 hover:border-neutral-750'
-        }`}
+        className="p-4 border transition-all duration-300 rounded-[6px] flex flex-col justify-between"
+        style={{
+          backgroundColor: 'var(--notion-bg-secondary)',
+          borderColor: 'var(--notion-border)',
+          minHeight: '190px'
+        }}
       >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex flex-col">
-            <span className={`text-[10px] font-mono uppercase tracking-widest font-extrabold ${
-              isLightMode ? 'text-neutral-450' : 'text-neutral-500'
-            }`}>Focus Phases</span>
-            <span className={`text-xs font-bold ${isLightMode ? 'text-neutral-800' : 'text-neutral-200'}`}>Dynamic Swimlanes</span>
-          </div>
-          <span className={`text-[10px] font-mono flex items-center gap-1 font-bold ${
-            isLightMode ? 'text-neutral-600 font-semibold' : 'text-emerald-400'
-          }`}>
-            <TrendingUp className="w-3.5 h-3.5" />
-            Targets
+        <div style={{ marginBottom: '12px' }}>
+          <span 
+            style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: 'var(--n-tx3)',
+              display: 'block'
+            }}
+          >
+            FOCUS PHASES
           </span>
         </div>
 
-        <div className="space-y-1.5 max-h-[170px] overflow-y-auto pr-1 scrollbar-thin">
-          {categoryStats.map(({ category, total, completed, percentage }) => {
+        <div className="flex-1 mt-1 overflow-y-auto max-h-[170px] scrollbar-none">
+          {categoryStats.map(({ category, total, completed, percentage }, index) => {
             const IconComponent = categoryIcons[category.icon] || Shield;
             const isSelected = selectedCategory === category.id;
 
@@ -193,144 +193,173 @@ export default function StatsSection({
               <button
                 key={category.id}
                 onClick={() => onSelectCategory(isSelected ? 'all' : category.id)}
-                className={`w-full text-left p-1.5 rounded-xl transition-all duration-150 flex items-center gap-2.5 border ${
-                  isSelected 
-                    ? isLightMode
-                      ? 'bg-neutral-100 border-neutral-250'
-                      : 'bg-neutral-800/80 border-neutral-700 shadow-xs' 
-                    : 'bg-transparent border-transparent hover:bg-neutral-500/5'
-                }`}
+                className="w-full text-left transition-all duration-150 flex items-center justify-between px-2 cursor-pointer border-none bg-transparent hover:bg-[var(--notion-bg-hover)]"
+                style={{
+                  height: '36px',
+                  borderBottom: index < categoryStats.length - 1 ? '1px solid var(--notion-border)' : 'none'
+                }}
               >
-                <div className={`p-1.5 rounded-lg border flex-shrink-0 ${
-                  isLightMode 
-                    ? 'bg-neutral-50 border-neutral-200 text-neutral-600'
-                    : category.color
-                }`}>
-                  <IconComponent className="w-3 h-3" />
+                <div className="flex items-center gap-2.5 truncate">
+                  <IconComponent 
+                    className="shrink-0" 
+                    style={{ width: '16px', height: '16px', color: 'var(--notion-text-secondary)' }} 
+                  />
+                  <span 
+                    className="truncate"
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: isSelected ? 500 : 400,
+                      color: isSelected ? 'var(--notion-text-primary)' : 'var(--notion-text-secondary)'
+                    }}
+                  >
+                    {category.name}
+                  </span>
                 </div>
                 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className={`font-semibold text-xs truncate ${
-                      isLightMode ? 'text-neutral-850' : 'text-neutral-200'
-                    }`}>{category.name}</span>
-                    <span className={`font-mono text-[9px] font-bold ${
-                      isLightMode ? 'text-neutral-500' : 'text-neutral-450'
-                    }`}>{completed}/{total} ({percentage}%)</span>
-                  </div>
-                  
-                  {/* Linear progress track */}
-                  <div className={`w-full h-1 rounded-full overflow-hidden ${
-                    isLightMode ? 'bg-neutral-150' : 'bg-neutral-800'
-                  }`}>
-                    <div 
-                      className={`h-full rounded-full transition-all duration-500 ${
-                        isLightMode 
-                          ? 'bg-blue-600'
-                          : category.id === 'security' ? 'bg-emerald-500' :
-                            category.id === 'infrastructure' ? 'bg-blue-500' :
-                            category.id === 'code-logic' ? 'bg-purple-500' :
-                            category.id === 'testing-ci' ? 'bg-orange-500' :
-                            category.id === 'data-integrity' ? 'bg-pink-500' : 'bg-amber-500'
-                      }`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
+                <span 
+                  style={{
+                    marginLeft: 'auto',
+                    fontSize: '12px',
+                    color: 'var(--n-tx3)',
+                    fontVariantNumeric: 'tabular-nums'
+                  }}
+                >
+                  {completed}/{total}
+                </span>
               </button>
             );
           })}
           {categoryStats.length === 0 && (
-            <div className={`text-center py-6 text-xs ${isLightMode ? 'text-neutral-400' : 'text-neutral-500'}`}>
-              No phases defined. Complete from scratch!
+            <div className="text-center py-4 text-xs" style={{ color: 'var(--notion-text-tertiary)' }}>
+              No phases defined.
             </div>
           )}
         </div>
       </div>
 
       {/* =========================================================================
-          COLUMN 3: COHESIVE TEAM DELEGATION & COLLABORATOR TRACKING
+          COLUMN 3: TEAM PERFORMANCE PANEL
           ========================================================================= */}
       <div 
         id="team-progress-card" 
-        className={`rounded-3xl p-5 flex flex-col justify-between shadow-lg transition duration-300 border ${
-          isLightMode 
-            ? 'bg-white border-neutral-200/90 hover:border-neutral-300' 
-            : 'bg-neutral-900/60 backdrop-blur-xl border-neutral-800/85 hover:border-neutral-750'
-        }`}
+        className="p-4 border transition-all duration-300 rounded-[6px] flex flex-col justify-between"
+        style={{
+          backgroundColor: 'var(--notion-bg-secondary)',
+          borderColor: 'var(--notion-border)',
+          minHeight: '190px'
+        }}
       >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex flex-col">
-            <span className={`text-[10px] font-mono uppercase tracking-widest font-extrabold ${
-              isLightMode ? 'text-neutral-450' : 'text-neutral-500'
-            }`}>Online Crew</span>
-            <span className={`text-xs font-bold ${isLightMode ? 'text-neutral-800' : 'text-neutral-200'}`}>Team Performance</span>
-          </div>
-          <span className={`text-[10px] font-mono flex items-center gap-1 font-bold ${
-            isLightMode ? 'text-neutral-500' : 'text-neural-500 text-neutral-400'
-          }`}>
-            <Users className="w-3.5 h-3.5 text-blue-500" />
-            {team.length} Assigned
+        <div style={{ marginBottom: '12px' }}>
+          <span 
+            style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.07em',
+              color: 'var(--n-tx3)',
+              display: 'block'
+            }}
+          >
+            TEAM PERFORMANCE
           </span>
         </div>
 
-        <div className="space-y-1.5 max-h-[170px] overflow-y-auto pr-1 scrollbar-thin">
-          {teammateStats.map(({ member, total, completed, percentage }) => (
-            <div
-              key={member.id}
-              className={`p-1.5 rounded-xl flex items-center gap-2.5 border transition ${
-                isLightMode 
-                  ? 'bg-neutral-50/50 border-neutral-100' 
-                  : 'bg-neutral-950/20 border-neutral-850/30'
-              }`}
-            >
-              {/* Teammate Circle Icon / Initials */}
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-mono font-black border ${member.avatarColor} border-white/10 shrink-0`}>
-                {member.name.split(' ').map(n=>n[0]).join('').substr(0,2).toUpperCase()}
-              </div>
+        <div className="flex-1 mt-1 overflow-y-auto max-h-[170px] scrollbar-none">
+          {teammateStats.map(({ member, total, completed }, index) => {
+            const initials = member.name.split(' ').map(n => n[0]).join('').substr(0, 2).toUpperCase();
 
-              {/* Teammate Metrics */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-3 text-left">
-                  <div className="truncate flex-1">
-                    <p className={`text-xs font-bold leading-none flex items-center gap-1.5 ${isLightMode ? 'text-neutral-800' : 'text-white'}`}>
-                      <span className="truncate">{member.name}</span>
-                      <button
-                        onClick={() => onAssignClick?.(member.id)}
-                        className="text-[10px] text-blue-500 dark:text-blue-400 font-semibold hover:bg-neutral-500/10 hover:underline px-1.5 py-0.5 rounded cursor-pointer transition shrink-0"
-                      >
-                        + assign
-                      </button>
-                    </p>
-                    <span className={`text-[9px] font-mono leading-none ${isLightMode ? 'text-neutral-400' : 'text-neutral-550'}`}>{member.role}</span>
+            return (
+              <div
+                key={member.id}
+                className="group flex items-center justify-between px-2 hover:bg-[var(--notion-bg-hover)] transition-all duration-150"
+                style={{
+                  height: '40px',
+                  borderBottom: index < teammateStats.length - 1 ? '1px solid var(--notion-border)' : 'none'
+                }}
+              >
+                {/* Left side: Avatar and name/role inline */}
+                <div className="flex items-center gap-2 truncate flex-1 mr-2">
+                  {/* Avatar */}
+                  <div 
+                    className="flex items-center justify-center font-mono font-bold shrink-0"
+                    style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--notion-bg-hover)',
+                      color: 'var(--notion-text-secondary)',
+                      fontSize: '11px'
+                    }}
+                  >
+                    {initials}
                   </div>
 
+                  {/* Name and Role inline */}
+                  <div className="truncate flex items-center gap-2">
+                    <span 
+                      className="truncate"
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        color: 'var(--notion-text-primary)'
+                      }}
+                    >
+                      {member.name}
+                    </span>
+                    <span 
+                      className="truncate hidden sm:inline-block"
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--notion-text-tertiary)'
+                      }}
+                    >
+                      {member.role}
+                    </span>
+
+                    {/* + assign button, only active on hover */}
+                    <button
+                      onClick={() => onAssignClick?.(member.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 border-none bg-transparent cursor-pointer font-sans text-xs underline"
+                      style={{
+                        color: 'var(--notion-accent-blue)',
+                        padding: '0 4px',
+                      }}
+                    >
+                      + assign
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right side status */}
+                <div className="shrink-0 text-right">
                   {total === 0 ? (
-                    <span className="text-xs text-muted-foreground text-neutral-500 dark:text-neutral-450 shrink-0 font-normal">
+                    <span 
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--notion-text-tertiary)'
+                      }}
+                    >
                       No tasks assigned
                     </span>
                   ) : (
-                    <div className="w-24 shrink-0 space-y-1">
-                      <div className="w-full h-1 rounded-full bg-muted bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
-                        <div 
-                          className="h-full rounded-full bg-primary bg-blue-600 dark:bg-emerald-500 transition-all duration-300"
-                          style={{ width: `${(completed / total) * 100}%` }}
-                        />
-                      </div>
-                      <div className="flex justify-between items-center text-[8px] font-mono text-neutral-500 dark:text-neutral-400 leading-none">
-                        <span>{Math.round((completed / total) * 100)}%</span>
-                        <span>{completed}/{total}</span>
-                      </div>
-                    </div>
+                    <span 
+                      style={{
+                        fontSize: '12px',
+                        color: 'var(--notion-text-secondary)',
+                        fontFamily: 'monospace'
+                      }}
+                    >
+                      {completed}/{total}
+                    </span>
                   )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {team.length === 0 && (
-            <div className={`text-center py-6 text-xs ${isLightMode ? 'text-neutral-400' : 'text-neutral-500'}`}>
-              No collaborators defined yet. Add teammates to delegate specs!
+            <div className="text-center py-4 text-xs" style={{ color: 'var(--notion-text-tertiary)' }}>
+              No teammates defined.
             </div>
           )}
         </div>

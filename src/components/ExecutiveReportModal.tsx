@@ -1,9 +1,6 @@
 import React from 'react';
-import { Project, ChecklistItem, Teammate, CategoryInfo } from '../types';
-import { 
-  X, Printer, Shield, ChevronRight, Award, Trophy, Users, CheckCircle2, 
-  AlertTriangle, Clock, Calendar, CheckSquare, Activity, FileCheck
-} from 'lucide-react';
+import { Project } from '../types';
+import { FileCheck, X, Printer } from 'lucide-react';
 
 interface ExecutiveReportModalProps {
   isOpen: boolean;
@@ -20,350 +17,704 @@ export default function ExecutiveReportModal({
 }: ExecutiveReportModalProps) {
   if (!isOpen) return null;
 
-  const totalTasks = project.items.length;
-  const completedTasks = project.items.filter(i => i.status === 'completed').length;
-  const inProgressTasks = project.items.filter(i => i.status === 'in-progress').length;
-  const todoTasks = project.items.filter(i => i.status === 'todo').length;
-  const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-  
-  const highPriorityTasks = project.items.filter(i => i.priority === 'high');
-  const outstandingHighPriority = highPriorityTasks.filter(i => i.status !== 'completed');
+  const cleanText = (text: string): string => {
+    if (!text) return '';
+    return text.replace(/Valedation/gi, 'Validation');
+  };
 
-  // Teammate metrics compiler
-  interface MemberMetrics {
-    member: Teammate;
-    assignedCount: number;
-    completedCount: number;
-    inProgressCount: number;
-    todoCount: number;
-    criticalPending: number;
-    efficiencyRating: string;
-    reviewComment: string;
-  }
+  const buildReportHTML = (proj: Project): string => {
+    const totalItems = proj.items.length;
+    const highItemsCount = proj.items.filter(i => i.priority === 'high').length;
+    const medItemsCount = proj.items.filter(i => i.priority === 'medium').length;
+    const lowItemsCount = proj.items.filter(i => i.priority === 'low').length;
+    const completedCount = proj.items.filter(i => i.status === 'completed').length;
+    const completionPercentage = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+    const generatedDateStr = new Date().toLocaleDateString(undefined, { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
 
-  const memberMetrics: MemberMetrics[] = project.team.map(m => {
-    const assigned = project.items.filter(i => i.assignedTo?.includes(m.id));
-    const completed = assigned.filter(i => i.status === 'completed').length;
-    const inProgress = assigned.filter(i => i.status === 'in-progress').length;
-    const todo = assigned.filter(i => i.status === 'todo').length;
-    const critical = assigned.filter(i => i.priority === 'high' && i.status !== 'completed').length;
-
-    let efficiency = '0%';
-    let review = '';
-    if (assigned.length > 0) {
-      const percentage = Math.round((completed / assigned.length) * 100);
-      efficiency = `${percentage}%`;
+    // 1. Build Phase Rows html
+    const focusPhasesRows = proj.categories.map(cat => {
+      const catItems = proj.items.filter(i => i.category === cat.id);
+      const total = catItems.length;
+      const completed = catItems.filter(i => i.status === 'completed').length;
       
-      if (percentage >= 80) {
-        review = 'Excellent velocity. Consistently meeting high staging security parameters ahead of shipping.';
-      } else if (percentage >= 50) {
-        review = 'Optimal contribution. Actively validating complex staging benchmarks and deployment operations.';
-      } else if (critical > 0) {
-        review = 'Action needed. Currently holding outstanding critical items. Needs cross-functional assistance.';
-      } else {
-        review = 'Validation stage. Developing code logic resilience, under reviewing for integration compliance.';
+      let statusText = 'PENDING';
+      let statusClass = 'pill-pending';
+      if (completed === total && total > 0) {
+        statusText = 'COMPLETE';
+        statusClass = 'pill-complete';
+      } else if (completed > 0) {
+        statusText = 'IN PROGRESS';
+        statusClass = 'pill-progress';
       }
-    } else {
-      efficiency = 'N/A';
-      review = 'Awaiting allocation. No active compliance assignments declared in the current release iteration.';
+      
+      return `
+        <tr>
+          <td style="font-weight: 500;">${cleanText(cat.name)}</td>
+          <td style="text-align: center;">${completed}</td>
+          <td style="text-align: center;">${total}</td>
+          <td style="text-align: center;"><span class="${statusClass}">${statusText}</span></td>
+        </tr>
+      `;
+    }).join('');
+
+    // 2. Build Team Roster rows html
+    const teamRosterRows = proj.team.map(m => {
+      const memberTasks = proj.items.filter(i => i.assignedTo?.includes(m.id));
+      const count = memberTasks.length;
+      const initials = m.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      
+      const countText = count > 0 
+        ? `<span>${count} tasks</span>` 
+        : `<span class="muted-text">No tasks assigned</span>`;
+        
+      const avatarBg = '#787774';
+      
+      return `
+        <div class="member-row">
+          <div class="member-avatar" style="background-color: ${avatarBg};">${initials}</div>
+          <div class="member-info">
+            <span class="member-name">${cleanText(m.name)}</span>
+            <span class="member-role">${cleanText(m.role)}</span>
+          </div>
+          <div class="member-count">${countText}</div>
+        </div>
+      `;
+    }).join('');
+
+    // Filter index for task grouping (Pages 3+)
+    const nonCanceledCategories = proj.categories;
+    const phasesContent = nonCanceledCategories.map((cat, catIdx) => {
+      const catItems = proj.items.filter(i => i.category === cat.id);
+      if (catItems.length === 0) return '';
+      
+      const completed = catItems.filter(i => i.status === 'completed').length;
+      const total = catItems.length;
+      
+      const itemsHTML = catItems.map(item => {
+        let priorityColor = '#aeaca8';
+        let badgeClass = 'badge-low';
+        let priorityLabel = 'Low';
+        
+        if (item.priority === 'high') {
+          priorityColor = '#e03e3e';
+          badgeClass = 'badge-high';
+          priorityLabel = 'High';
+        } else if (item.priority === 'medium') {
+          priorityColor = '#d9730d';
+          badgeClass = 'badge-med';
+          priorityLabel = 'Medium';
+        } else if (item.priority === 'low') {
+          priorityColor = '#0f7b6c';
+          badgeClass = 'badge-low';
+          priorityLabel = 'Low';
+        }
+
+        const assignees = proj.team.filter(t => item.assignedTo?.includes(t.id));
+        const assigneeNames = assignees.length > 0 
+          ? assignees.map(a => a.name).join(', ') 
+          : 'Unassigned';
+
+        let statusIndicator = '○  Not started';
+        if (item.status === 'completed') {
+          statusIndicator = '●  Completed';
+        } else if (item.status === 'in-progress') {
+          statusIndicator = '◐  In progress';
+        }
+
+        const statusStyle = item.status === 'completed' 
+          ? 'color: #166534; font-weight: 500;' 
+          : item.status === 'in-progress'
+          ? 'color: #d9730d; font-weight: 500;'
+          : 'color: #787774;';
+
+        const cardClass = `task-card ${item.priority}`;
+
+        return `
+          <div class="${cardClass}" style="border-left: 3px solid ${priorityColor};">
+            <div class="card-row-1">
+              <h4 class="card-title">${cleanText(item.title)}</h4>
+              <span class="priority-badge ${badgeClass}">${priorityLabel}</span>
+            </div>
+            <p class="card-desc">${cleanText(item.description)}</p>
+            <div class="card-metadata">
+              <div>Phase: ${cleanText(cat.name)}</div>
+              <div>Assignee: ${cleanText(assigneeNames)}</div>
+            </div>
+            <div class="card-status" style="${statusStyle}">
+              ${statusIndicator}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const isLastPhase = catIdx === nonCanceledCategories.length - 1;
+      const pageBreakStyle = isLastPhase ? '' : 'style="page-break-after: always;"';
+
+      return `
+        <div class="phase-group" ${pageBreakStyle}>
+          <div class="phase-header-bar">
+            <h3 class="phase-header-title">${cleanText(cat.name)}</h3>
+            <span class="phase-header-comp">${completed} / ${total} items complete</span>
+          </div>
+          <div>
+            ${itemsHTML}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Executive Audit Report - ${cleanText(proj.name)}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 20mm 16mm;
+    }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: #37352f;
+      background: #ffffff;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+    }
+    * { 
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact; 
+      print-color-adjust: exact; 
+    }
+    
+    /* Cover Page CSS */
+    .page-cover {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 250mm;
+      height: 100%;
+      position: relative;
+      box-sizing: border-box;
+      padding: 20px;
+      page-break-after: always;
+    }
+    .cover-logo {
+      font-size: 32px;
+      font-weight: 600;
+      color: #37352f;
+      margin: 0;
+    }
+    .cover-subtitle {
+      font-size: 18px;
+      font-weight: 400;
+      color: #787774;
+      margin: 4px 0 0 0;
+    }
+    .cover-hr {
+      border: none;
+      border-top: 1px solid #e9e9e7;
+      width: 60%;
+      margin: 32px auto;
+    }
+    .cover-project-name {
+      font-size: 22px;
+      font-weight: 500;
+      color: #37352f;
+      margin: 0 0 8px 0;
+    }
+    .cover-desc {
+      font-size: 14px;
+      color: #787774;
+      max-width: 480px;
+      margin: 0 auto;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .cover-date {
+      font-size: 12px;
+      color: #aeaca8;
+      margin-top: 8px;
+    }
+    .cover-spacer {
+      height: 80px;
+    }
+    .cover-metrics {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 48px;
+      width: 100%;
+    }
+    .cover-metric-box {
+      text-align: center;
+    }
+    .cover-metric-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: #37352f;
+      margin: 0;
+    }
+    .cover-metric-label {
+      font-size: 12px;
+      font-weight: 400;
+      color: #aeaca8;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cover-confidential {
+      position: absolute;
+      bottom: 10mm;
+      left: 0;
+      right: 0;
+      font-size: 10px;
+      color: #aeaca8;
+      text-align: center;
+      letter-spacing: 0.1em;
     }
 
-    return {
-      member: m,
-      assignedCount: assigned.length,
-      completedCount: completed,
-      inProgressCount: inProgress,
-      todoCount: todo,
-      criticalPending: critical,
-      efficiencyRating: efficiency,
-      reviewComment: review
-    };
-  });
+    /* Page-Section for dashboard */
+    .page-section {
+      page-break-after: always;
+      box-sizing: border-box;
+      padding-top: 10px;
+    }
+    .section-header {
+      font-size: 16px;
+      font-weight: 500;
+      border-bottom: 1px solid #e9e9e7;
+      padding-bottom: 8px;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #37352f;
+    }
+    .two-column-grid {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .column-half {
+      flex: 1;
+      width: 50%;
+    }
+    .section-lbl {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #aeaca8;
+      margin-bottom: 12px;
+    }
+    
+    /* Tables styling */
+    .phases-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .phases-table th {
+      text-align: left;
+      padding: 8px 4px;
+      border-bottom: 1px solid #e9e9e7;
+      color: #787774;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .phases-table td {
+      padding: 10px 4px;
+      border-bottom: 1px solid #e9e9e7;
+    }
+    .pill-pending {
+      background-color: #fffbeb !important;
+      color: #92400e !important;
+      border: 1px solid #fde68a;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .pill-progress {
+      background-color: #eff6ff !important;
+      color: #1e40af !important;
+      border: 1px solid #bfdbfe;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    .pill-complete {
+      background-color: #f0fdf4 !important;
+      color: #166534 !important;
+      border: 1px solid #bbf7d0;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    
+    /* Roster list */
+    .member-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #e9e9e7;
+    }
+    .member-avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+    }
+    .member-info {
+      flex-grow: 1;
+    }
+    .member-name {
+      font-weight: 500;
+    }
+    .member-role {
+      font-size: 11px;
+      color: #787774;
+      margin-left: 6px;
+    }
+    .member-count {
+      font-size: 11px;
+      color: #aeaca8;
+      font-family: monospace;
+    }
+    .muted-text {
+      color: #aeaca8;
+      font-style: italic;
+    }
+    
+    /* Risk boxes */
+    .risk-summary-bar {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .risk-box {
+      flex: 1;
+      padding: 12px 24px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .risk-box.high {
+      background-color: #fef2f2 !important;
+      color: #991b1b !important;
+      border: 1px solid #fecaca;
+    }
+    .risk-box.med {
+      background-color: #fffbeb !important;
+      color: #92400e !important;
+      border: 1px solid #fde68a;
+    }
+    .risk-box.low {
+      background-color: #f0fdf4 !important;
+      color: #166534 !important;
+      border: 1px solid #bbf7d0;
+    }
+    .risk-box-count {
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .risk-box-lbl {
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Checklist groupings */
+    .phase-group {
+      page-break-after: always;
+      box-sizing: border-box;
+      padding-top: 10px;
+    }
+    .phase-group:last-of-type {
+      page-break-after: avoid !important;
+    }
+    .phase-header-bar {
+      background: #f7f6f3 !important;
+      padding: 10px 16px;
+      border-left: 3px solid #37352f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .phase-header-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0;
+      color: #37352f;
+    }
+    .phase-header-comp {
+      font-size: 12px;
+      color: #787774;
+    }
+    
+    /* Card details */
+    .task-card {
+      border: 1px solid #e9e9e7;
+      border-radius: 4px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      page-break-inside: avoid !important;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    
+    .card-row-1 {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+      color: #37352f;
+    }
+    .priority-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge-high {
+      background-color: #fef2f2 !important;
+      color: #991b1b !important;
+      border: 1px solid #fecaca;
+    }
+    .badge-med {
+      background-color: #fffbeb !important;
+      color: #92400e !important;
+      border: 1px solid #fde68a;
+    }
+    .badge-low {
+      background-color: #f0fdf4 !important;
+      color: #166534 !important;
+      border: 1px solid #bbf7d0;
+    }
+    
+    .card-desc {
+      font-size: 12px;
+      color: #787774;
+      line-height: 1.5;
+      margin: 6px 0 0 0;
+    }
+    
+    .card-metadata {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #aeaca8;
+      margin-top: 4px;
+    }
+    .card-status {
+      font-size: 11px;
+      color: #aeaca8;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
 
-  // Category statistics compiler
-  const categoryStats = project.categories.map(cat => {
-    const catItems = project.items.filter(i => i.category === cat.id);
-    const catDone = catItems.filter(i => i.status === 'completed').length;
-    return {
-      category: cat,
-      total: catItems.length,
-      done: catDone,
-      percent: catItems.length > 0 ? Math.round((catDone / catItems.length) * 105) : 0 // slight aesthetic bias or normal capping
-    };
-  });
+  <!-- PAGE 1: Cover Page -->
+  <div class="page-cover">
+    <h1 class="cover-logo">ProdReady</h1>
+    <h2 class="cover-subtitle">Executive Audit Report</h2>
+    <hr class="cover-hr">
+    <h3 class="cover-project-name">${cleanText(proj.name)}</h3>
+    <p class="cover-desc">${cleanText(proj.description || 'Verified software compliance checklist tracking data integrity, secrets lifecycle, and architectural specifications.')}</p>
+    <div class="cover-date">Generated on ${generatedDateStr}</div>
+    
+    <div class="cover-spacer"></div>
+    
+    <div class="cover-metrics">
+      <div class="cover-metric-box">
+        <div class="cover-metric-value">${totalItems}</div>
+        <div class="cover-metric-label">Total items</div>
+      </div>
+      <div class="cover-metric-box">
+        <div class="cover-metric-value">${highItemsCount}</div>
+        <div class="cover-metric-label">High blockers</div>
+      </div>
+      <div class="cover-metric-box">
+        <div class="cover-metric-value">${completionPercentage}%</div>
+        <div class="cover-metric-label">Completion</div>
+      </div>
+    </div>
+    
+    <div class="cover-confidential">CONFIDENTIAL — INTERNAL USE ONLY</div>
+  </div>
 
-  const handleTriggerPrint = () => {
-    window.print();
+  <!-- PAGE 2: Summary Dashboard -->
+  <div class="page-section">
+    <h2 class="section-header">Project Overview</h2>
+    
+    <div class="two-column-grid">
+      <!-- Left Column: Focus Phases -->
+      <div class="column-half">
+        <div class="section-lbl">Focus phases</div>
+        <table class="phases-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th style="text-align: center;">Completed</th>
+              <th style="text-align: center;">Total</th>
+              <th style="text-align: center;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${focusPhasesRows}
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Right Column: Team Roster -->
+      <div class="column-half">
+        <div class="section-lbl">Team roster</div>
+        <div>
+          ${teamRosterRows || '<div class="muted-text">No crew members registered.</div>'}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Below the Grid: Risk summary bar -->
+    <div style="margin-top: 32px;">
+      <div class="section-lbl">Risk profiles</div>
+      <div class="risk-summary-bar">
+        <div class="risk-box high">
+          <div class="risk-box-count">${highItemsCount}</div>
+          <div class="risk-box-lbl">HIGH</div>
+        </div>
+        <div class="risk-box med">
+          <div class="risk-box-count">${medItemsCount}</div>
+          <div class="risk-box-lbl">MED</div>
+        </div>
+        <div class="risk-box low">
+          <div class="risk-box-count">${lowItemsCount}</div>
+          <div class="risk-box-lbl">LOW</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGES 3+: Checklist details, grouped by phase -->
+  ${phasesContent}
+
+</body>
+</html>
+`;
+  };
+
+  const generatePDF = (proj: Project) => {
+    const html = buildReportHTML(proj);
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => {
+      win.print();
+      win.onafterprint = () => win.close();
+    };
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-lg bg-neutral-950/70 overflow-y-auto print:bg-white print:absolute print:inset-0 print:p-0">
-      
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-neutral-950/60 overflow-y-auto">
       <div 
-        id="printable-executive-report"
-        className={`w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl border flex flex-col max-h-[92vh] print:max-h-none print:shadow-none print:border-none print:rounded-none ${
+        className={`w-full max-w-md rounded-2xl overflow-hidden shadow-2xl border flex flex-col p-6 space-y-6 transition-all duration-200 ${
           isLightMode 
             ? 'bg-white border-neutral-200 text-neutral-800' 
             : 'bg-neutral-900 border-neutral-800 text-white'
         }`}
       >
-        
-        {/* Header (Hidden in Print) */}
-        <div className="p-5 border-b flex items-center justify-between print:hidden border-neutral-200/60 dark:border-neutral-800/85">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
               <FileCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-black tracking-tight text-neutral-900 dark:text-white">
-                Executive Audit & Performance Report
-              </h3>
+              <h3 className="text-sm font-black tracking-tight">Executive Audit PDF</h3>
               <p className="text-[10px] font-mono uppercase tracking-wider text-neutral-500">
-                Staging to Production Validation Review
+                Staging Compliance Report
               </p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleTriggerPrint}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-550 text-white text-xs font-semibold rounded-xl shadow-sm transition"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Print to PDF</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-700 dark:hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-400 hover:text-neutral-700 dark:hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Report Canvas Frame Container */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 font-sans print:overflow-visible print:px-4 print:py-6 print:text-black">
-          
-          {/* Cover Header Block */}
-          <div className="border-b-4 border-blue-600 pb-6 space-y-3">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-              <span className="text-[10px] font-mono uppercase tracking-widest bg-blue-500/15 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full font-black print:text-xs">
-                PRODREADY CONSOLIDATED AUDIT SPECIFICATION
-              </span>
-              <span className="text-xs font-mono text-neutral-500">
-                Report Date: {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </span>
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-neutral-900 dark:text-white">
-              {project.name}
-            </h1>
-            <p className="text-xs text-neutral-500 max-w-3xl leading-relaxed">
-              {project.description || 'Verified and compiled software compliance checklist tracking data integrity, secrets lifecycle, and architectural specifications.'}
-            </p>
-          </div>
-
-          {/* Quick Metrics Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            
-            <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-950/40 border border-neutral-200/80 dark:border-neutral-805">
-              <span className="text-[10px] font-mono uppercase block text-neutral-500">Overall Progress</span>
-              <span className="text-2xl font-black text-blue-600 dark:text-blue-400 font-mono tracking-tight">{progressPercent}%</span>
-              <div className="w-full bg-neutral-200 dark:bg-neutral-800 h-1.5 rounded-full mt-2 overflow-hidden">
-                <div className="bg-blue-500 h-full" style={{ width: `${progressPercent}%` }} />
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-950/40 border border-neutral-200/80 dark:border-neutral-805">
-              <span className="text-[10px] font-mono uppercase block text-neutral-500">Completed Specifications</span>
-              <span className="text-2xl font-black text-emerald-500 font-mono tracking-tight">{completedTasks} <span className="text-xs text-neutral-500 font-normal">/ {totalTasks}</span></span>
-              <span className="block text-[10px] text-neutral-500 mt-1">{totalTasks - completedTasks} outstanding steps</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-950/40 border border-neutral-200/80 dark:border-neutral-805">
-              <span className="text-[10px] font-mono uppercase block text-neutral-500">Active Validation</span>
-              <span className="text-2xl font-black text-amber-500 font-mono tracking-tight">{inProgressTasks}</span>
-              <span className="block text-[10px] text-neutral-500 mt-1">Undergoing testing loops</span>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-950/40 border border-neutral-200/80 dark:border-neutral-805">
-              <span className="text-[10px] font-mono uppercase block text-neutral-500">Outstanding High Risk</span>
-              <span className={`text-2xl font-black font-mono tracking-tight ${outstandingHighPriority.length > 0 ? 'text-rose-500 font-bold' : 'text-neutral-500'}`}>
-                {outstandingHighPriority.length}
-              </span>
-              <span className="block text-[10px] text-neutral-500 mt-1">Must resolve before ship</span>
-            </div>
-
-          </div>
-
-          {/* Section: Operational Performance Index */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b pb-2 border-neutral-200 dark:border-neutral-800">
-              <Activity className="w-4.5 h-4.5 text-blue-500" />
-              <h2 className="text-base font-extrabold tracking-tight text-neutral-900 dark:text-white">
-                Staging Team Performance Review (Velocity Index)
-              </h2>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs min-w-[600px]">
-                <thead>
-                  <tr className="border-b border-neutral-200 dark:border-neutral-800 text-neutral-500 font-mono font-bold uppercase text-[9px] tracking-wider bg-neutral-500/5">
-                    <th className="py-2.5 px-3">Collaborator / Position</th>
-                    <th className="py-2.5 px-3 text-center">Assigned</th>
-                    <th className="py-2.5 px-3 text-center">Signed Off</th>
-                    <th className="py-2.5 px-3 text-center">Running</th>
-                    <th className="py-2.5 px-3 text-center">Blocked High</th>
-                    <th className="py-2.5 px-3 text-center">Staged KPI</th>
-                    <th className="py-2.5 px-3">Performance Comment</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100 dark:divide-neutral-805">
-                  {memberMetrics.map(item => (
-                    <tr key={item.member.id} className="hover:bg-neutral-500/5">
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-mono font-bold ${item.member.avatarColor}`}>
-                            {item.member.name.split(' ').map(n=>n[0]).join('')}
-                          </div>
-                          <div>
-                            <span className="font-bold block text-neutral-850 dark:text-neutral-200">{item.member.name}</span>
-                            <span className="text-[9px] text-neutral-500 font-mono">{item.member.role}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 text-center font-mono font-bold">{item.assignedCount}</td>
-                      <td className="py-3 px-3 text-center font-mono text-emerald-500 font-bold">{item.completedCount}</td>
-                      <td className="py-3 px-3 text-center font-mono text-amber-500">{item.inProgressCount}</td>
-                      <td className={`py-3 px-3 text-center font-mono font-bold ${item.criticalPending > 0 ? 'text-rose-500' : 'text-neutral-400'}`}>
-                        {item.criticalPending}
-                      </td>
-                      <td className="py-3 px-3 text-center font-mono font-bold text-blue-600 dark:text-blue-400">
-                        {item.efficiencyRating}
-                      </td>
-                      <td className="py-3 px-3 text-neutral-600 dark:text-neutral-400 leading-relaxed text-[11px] max-w-xs truncate" title={item.reviewComment}>
-                        {item.reviewComment}
-                      </td>
-                    </tr>
-                  ))}
-                  {memberMetrics.length === 0 && (
-                    <tr>
-                      <td colSpan={7} className="py-4 text-center text-neutral-500 italic">No assigned crew members available on roster to compile metrics.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Section: Category/Phase Gating Health */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 border-b pb-2 border-neutral-200 dark:border-neutral-800">
-              <CheckSquare className="w-4.5 h-4.5 text-blue-500" />
-              <h2 className="text-base font-extrabold tracking-tight text-neutral-900 dark:text-white">
-                Operational Domains Gating Matrix
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {categoryStats.map(stat => {
-                const isComplete = stat.done === stat.total && stat.total > 0;
-                return (
-                  <div key={stat.category.id} className="p-3.5 rounded-2xl border border-neutral-200 dark:border-neutral-805 bg-neutral-50 dark:bg-radial from-neutral-950/20 text-xs">
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="font-bold text-neutral-800 dark:text-neutral-200 truncate pr-1">{stat.category.name}</span>
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-mono font-bold uppercase ${
-                        isComplete 
-                          ? 'bg-emerald-500/10 text-emerald-500'
-                          : stat.total === 0 ? 'bg-neutral-500/10 text-neutral-500' : 'bg-blue-500/10 text-blue-500'
-                      }`}>
-                        {stat.total === 0 ? 'Empty' : isComplete ? 'PASSED 100%' : 'PENDING'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between font-mono text-[9px] text-neutral-500 mb-1">
-                      <span>Valedation checklist steps:</span>
-                      <span>{stat.done} / {stat.total}</span>
-                    </div>
-                    {/* Progress Bar overlay */}
-                    <div className="w-full bg-neutral-200 dark:bg-neutral-800 h-1 rounded-full overflow-hidden">
-                      <div className="bg-emerald-500 h-full" style={{ width: `${stat.percent > 100 ? 100 : stat.percent}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Section: High & Medium Risks Outstanding Checklist */}
-          {outstandingHighPriority.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 border-b pb-2 border-rose-500/30">
-                <AlertTriangle className="w-4.5 h-4.5 text-rose-500" />
-                <h2 className="text-base font-extrabold tracking-tight text-rose-500">
-                  Critical Vulnerabilities & Staging Blockers
-                </h2>
-              </div>
-
-              <div className="space-y-3.5">
-                {outstandingHighPriority.map(task => {
-                  const phase = project.categories.find(c => c.id === task.category)?.name || 'General';
-                  const leads = project.team.filter(t => task.assignedTo?.includes(t.id)).map(t => t.name).join(', ') || 'Unassigned';
-                  return (
-                    <div key={task.id} className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 text-xs flex flex-col gap-1">
-                      <div className="flex items-start md:items-center justify-between gap-2.5">
-                        <span className="font-bold text-neutral-900 dark:text-neutral-100">{task.title}</span>
-                        <span className="text-[9px] font-mono whitespace-nowrap bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded-full uppercase tracking-wide font-black">
-                          CRITICAL DEPLOY RISK
-                        </span>
-                      </div>
-                      <p className="text-neutral-600 dark:text-neutral-400 text-[11px] mt-1 pr-1 leads-relaxed">
-                        {task.description}
-                      </p>
-                      
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[9px] font-mono text-neutral-500 border-t border-dashed border-rose-500/15 pt-2">
-                        <span>Phase Milestone: <strong className="text-neutral-600 dark:text-neutral-400">{phase}</strong></span>
-                        <span>Assignee owner: <strong className="text-neutral-600 dark:text-neutral-400">{leads}</strong></span>
-                        {task.dueDate && <span>Deadline: <strong className="text-rose-500 font-bold">{task.dueDate}</strong></span>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Summary Executive Signoff Log (Signature blocks for PDF report prints) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 border-t pt-10 border-neutral-300 dark:border-neutral-800">
-            <div>
-              <p className="text-xs italic text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                "Compliance verification ensures client databases, rate policies, PII encryption blocks, OAuth models, and regression CI matrices conform strictly to high staging parameters. Any skipped checks are done under explicit product architectural decision risk exception codes."
-              </p>
-              <div className="flex items-center gap-1.5 mt-4 text-[10px] font-mono text-neutral-400">
-                <Activity className="w-3.5 h-3.5 text-blue-500" />
-                <span>Computed validation score: {progressPercent}% of target specifications.</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="border-b border-neutral-400 dark:border-neutral-700 pb-1.5 flex flex-col justify-end min-h-[60px] text-[10px] text-center font-mono">
-                <span className="text-neutral-400 block font-bold">QA Lead Signature</span>
-                <span className="text-neutral-500 text-[8px] uppercase block">Validation Date</span>
-              </div>
-              <div className="border-b border-neutral-400 dark:border-neutral-700 pb-1.5 flex flex-col justify-end min-h-[60px] text-[10px] text-center font-mono">
-                <span className="text-neutral-400 block font-bold">DevSecOps signoff</span>
-                <span className="text-neutral-500 text-[8px] uppercase block">Ship release Code</span>
-              </div>
-            </div>
-          </div>
-
+        <div className="space-y-4">
+          <p className="text-xs text-neutral-500 leading-relaxed">
+            Ready to generate the official executive audit and verification package. 
+            This will launch a clean, standalone printable report containing:
+          </p>
+          <ul className="space-y-2 text-xs text-neutral-600 dark:text-neutral-400 font-mono">
+            <li className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span>Full A4 executive cover page & summary metrics</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span>Gating matrix and team operational roster</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span>All compliance checklist cards grouped by phase</span>
+            </li>
+          </ul>
         </div>
 
-        {/* Footer print note */}
-        <div className="p-4 bg-neutral-100 dark:bg-neutral-950/40 text-center text-[9px] font-mono text-neutral-500 border-t border-neutral-200/40 dark:border-neutral-900 print:bg-white print:text-black">
-          Report compiled off-site securely via ProdReady Consolidated STG. No external API logs stored.
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={() => generatePDF(project)}
+            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 hover:bg-blue-550 text-white text-xs font-semibold rounded-xl shadow-sm transition transform active:scale-95"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            <span>Generate PDF Report</span>
+          </button>
+          <button
+            onClick={onClose}
+            className="px-4 py-2.5 border border-neutral-300 dark:border-neutral-750 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-semibold rounded-xl transition"
+          >
+            Cancel
+          </button>
         </div>
-
       </div>
-
     </div>
   );
 }
