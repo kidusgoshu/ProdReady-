@@ -18,6 +18,7 @@ interface StatsSectionProps {
     primaryText: string;
     progressBar: string;
   };
+  onAssignClick?: (memberId: string) => void;
 }
 
 const categoryIcons: Record<string, React.ComponentType<any>> = {
@@ -43,7 +44,8 @@ export default function StatsSection({
   onSelectCategory, 
   selectedCategory,
   isLightMode,
-  accent
+  accent,
+  onAssignClick
 }: StatsSectionProps) {
   
   // Calculate category-specific progress dynamically based on project defined focus subgroups
@@ -289,27 +291,38 @@ export default function StatsSection({
 
               {/* Teammate Metrics */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <div className="truncate">
-                    <p className={`text-xs font-bold truncate leading-none ${isLightMode ? 'text-neutral-800' : 'text-white'}`}>{member.name}</p>
-                    <span className={`text-[9px] font-mono leading-none ${isLightMode ? 'text-neutral-400' : 'text-neutral-500'}`}>{member.role}</span>
+                <div className="flex items-center justify-between gap-3 text-left">
+                  <div className="truncate flex-1">
+                    <p className={`text-xs font-bold leading-none flex items-center gap-1.5 ${isLightMode ? 'text-neutral-800' : 'text-white'}`}>
+                      <span className="truncate">{member.name}</span>
+                      <button
+                        onClick={() => onAssignClick?.(member.id)}
+                        className="text-[10px] text-blue-500 dark:text-blue-400 font-semibold hover:bg-neutral-500/10 hover:underline px-1.5 py-0.5 rounded cursor-pointer transition shrink-0"
+                      >
+                        + assign
+                      </button>
+                    </p>
+                    <span className={`text-[9px] font-mono leading-none ${isLightMode ? 'text-neutral-400' : 'text-neutral-550'}`}>{member.role}</span>
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className={`text-[10px] font-mono font-black ${isLightMode ? 'text-neutral-700' : 'text-neutral-350'}`}>
-                      {completed}/{total}
-                    </span>
-                    <p className="text-[8px] font-mono text-neutral-500 leading-none">{percentage}% done</p>
-                  </div>
-                </div>
 
-                {/* Performance linear meter */}
-                <div className={`w-full h-1 mt-1 rounded-full overflow-hidden ${
-                  isLightMode ? 'bg-neutral-150' : 'bg-neutral-850'
-                }`}>
-                  <div 
-                    className="h-full rounded-full bg-blue-550 bg-blue-500 transition-all duration-500"
-                    style={{ width: `${total ? percentage : 0}%` }}
-                  />
+                  {total === 0 ? (
+                    <span className="text-xs text-muted-foreground text-neutral-500 dark:text-neutral-450 shrink-0 font-normal">
+                      No tasks assigned
+                    </span>
+                  ) : (
+                    <div className="w-24 shrink-0 space-y-1">
+                      <div className="w-full h-1 rounded-full bg-muted bg-neutral-200 dark:bg-neutral-800 overflow-hidden">
+                        <div 
+                          className="h-full rounded-full bg-primary bg-blue-600 dark:bg-emerald-500 transition-all duration-300"
+                          style={{ width: `${(completed / total) * 100}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-[8px] font-mono text-neutral-500 dark:text-neutral-400 leading-none">
+                        <span>{Math.round((completed / total) * 100)}%</span>
+                        <span>{completed}/{total}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

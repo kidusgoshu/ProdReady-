@@ -148,20 +148,17 @@ export default function TaskBoard({
                   />
                 ))
               ) : (
-                <div className={`h-full min-h-[300px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed rounded-2xl select-none ${
-                  isLightMode ? 'border-neutral-200 text-neutral-400' : 'border-neutral-800/60 text-neutral-650'
-                }`}>
-                  <Coffee className={`w-8 h-8 mb-2 animate-bounce ${
-                    isLightMode ? 'text-neutral-300' : 'text-neutral-700'
-                  }`} />
-                  <p className={`text-xs font-bold font-sans ${isLightMode ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                    No tasks in this swimlane
-                  </p>
-                  <p className={`text-[10px] font-mono mt-1 ${isLightMode ? 'text-neutral-400' : 'text-neutral-550'}`}>
-                    {col.id === 'todo' && "Backlog completely cleared!"}
-                    {col.id === 'in-progress' && "Drag cards here to run validations."}
-                    {col.id === 'completed' && "Commit changes to mark production ready."}
-                  </p>
+                <div 
+                  style={{ borderWidth: '1.5px' }}
+                  className={`min-h-[120px] flex flex-col items-center justify-center text-center p-4 border-dashed border-border rounded-2xl select-none ${
+                    isLightMode 
+                      ? 'border-neutral-250 text-neutral-500 bg-neutral-50/50' 
+                      : 'border-neutral-800 text-neutral-400 bg-neutral-950/20'
+                  }`}
+                >
+                  <span className="text-xs text-muted-foreground text-neutral-500 dark:text-neutral-400 font-medium">
+                    drag cards here to validate
+                  </span>
                 </div>
               )}
             </div>

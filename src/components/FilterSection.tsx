@@ -125,25 +125,21 @@ export default function FilterSection({
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 animate-fade-in">
           {/* Default ALL button */}
           <button
             onClick={() => setSelectedCategory('all')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 uppercase tracking-wide ${
+            className={`px-3.5 py-1.5 text-xs font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 uppercase tracking-wide border rounded-md ${
               selectedCategory === 'all'
-                ? isLightMode
-                  ? 'bg-neutral-900 text-white shadow-sm'
-                  : 'bg-white text-neutral-950 font-bold'
-                : isLightMode
-                ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-600'
-                : 'bg-neutral-950/40 hover:bg-neutral-800 text-neutral-400 border border-transparent hover:border-neutral-800'
+                ? 'bg-accent text-accent-foreground border-neutral-300 dark:border-neutral-700 bg-neutral-250 dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 shadow-sm font-semibold'
+                : 'bg-transparent text-muted-foreground text-neutral-500 dark:text-neutral-450 border-transparent hover:bg-muted hover:bg-neutral-100 dark:hover:bg-neutral-900 font-normal'
             }`}
           >
             <span>All Phases</span>
             <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
               selectedCategory === 'all'
-                ? isLightMode ? 'bg-neutral-700 text-white' : 'bg-neutral-250 text-neutral-900'
-                : isLightMode ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-900 text-neutral-500'
+                ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950'
+                : 'border border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400'
             }`}>
               {getCategoryCount('all')}
             </span>
@@ -158,21 +154,17 @@ export default function FilterSection({
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 text-xs font-medium transition-all duration-200 cursor-pointer flex items-center gap-1.5 border rounded-md ${
                   isSelected
-                    ? isLightMode
-                      ? 'bg-neutral-800 text-white shadow-sm font-semibold'
-                      : accent.tabActiveBg + ' font-bold'
-                    : isLightMode
-                    ? 'bg-neutral-100 hover:bg-neutral-200 text-neutral-600'
-                    : 'bg-neutral-950/45 hover:bg-neutral-800 text-neutral-400 border border-transparent hover:border-neutral-800'
+                    ? 'bg-accent text-accent-foreground border-neutral-300 dark:border-neutral-700 bg-neutral-250 dark:bg-neutral-800 text-neutral-950 dark:text-neutral-50 shadow-sm font-semibold'
+                    : 'bg-transparent text-muted-foreground text-neutral-500 dark:text-neutral-455 border-transparent hover:bg-muted hover:bg-neutral-100 dark:hover:bg-neutral-900 font-normal'
                 }`}
               >
                 <span>{cat.name}</span>
-                <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full ${
+                <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full ${
                   isSelected
-                    ? isLightMode ? 'bg-neutral-600 text-white' : 'bg-neutral-950/30'
-                    : isLightMode ? 'bg-neutral-200 text-neutral-500' : 'bg-neutral-900 text-neutral-500'
+                    ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950'
+                    : 'border border-neutral-300 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400'
                 }`}>
                   {count}
                 </span>
@@ -183,12 +175,12 @@ export default function FilterSection({
       </div>
 
       {/* =========================================================================
-          ROW 3: Criticality filters as compact Segmented Controls
+          ROW 3: Criticality filters promoted to 3 Clickable Metric Cards
           ========================================================================= */}
-      <div className={`pt-3 border-t flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+      <div className={`pt-4 border-t ${
         isLightMode ? 'border-neutral-150' : 'border-neutral-800/40'
       }`}>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 mb-3.5">
           <SlidersHorizontal className={`w-3.5 h-3.5 ${isLightMode ? 'text-neutral-500' : 'text-neutral-400'}`} />
           <span className={`text-[10px] font-mono uppercase tracking-widest font-bold ${
             isLightMode ? 'text-neutral-550' : 'text-neutral-400'
@@ -197,76 +189,57 @@ export default function FilterSection({
           </span>
         </div>
 
-        {/* Balanced segmented layout mimicking native preferences */}
-        <div className={`p-1 rounded-2xl flex items-center gap-0.5 max-w-[340px] w-full self-start sm:self-center border ${
-          isLightMode ? 'bg-neutral-100 border-neutral-200' : 'bg-neutral-950/90 border-neutral-850'
-        }`}>
-          
-          {/* ALL SEGMENT */}
+        <div className="grid grid-cols-3 gap-4">
+          {/* HIGH CARD */}
           <button
-            onClick={() => setSelectedPriority('all')}
-            className={`flex-1 text-center py-2 px-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-150 cursor-pointer ${
-              selectedPriority === 'all'
-                ? isLightMode 
-                  ? 'bg-white text-neutral-900 shadow-sm' 
-                  : 'bg-neutral-800 text-white shadow'
-                : 'text-neutral-500 hover:text-neutral-400'
-            }`}
-          >
-            All <span className="text-[9px] opacity-70">({getPriorityCount('all')})</span>
-          </button>
-
-          {/* HIGH SEGMENT */}
-          <button
-            onClick={() => setSelectedPriority('high')}
-            className={`flex-1 text-center py-2 px-3 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer flex items-center justify-center gap-1 ${
+            onClick={() => setSelectedPriority(selectedPriority === 'high' ? 'all' : 'high')}
+            className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 text-center cursor-pointer ${
               selectedPriority === 'high'
-                ? isLightMode 
-                  ? 'bg-rose-100 text-rose-700 shadow-sm' 
-                  : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                : 'text-rose-500/60 hover:text-rose-500'
+                ? 'ring-2 ring-red-500 border-red-500 scale-[1.02]'
+                : 'border-transparent'
+            } ${
+              isLightMode 
+                ? 'bg-red-50 text-red-800 hover:bg-red-100/60 shadow-xs' 
+                : 'bg-red-900/40 text-red-200 hover:bg-radial border-neutral-900/50'
             }`}
-            title="High Risks"
           >
-            <Flame className="w-3.5 h-3.5" />
-            <span>High</span>
-            <span className="text-[9px] opacity-80">({getPriorityCount('high')})</span>
+            <span className="text-xl font-medium">{getPriorityCount('high')}</span>
+            <span className="text-xs">High</span>
           </button>
 
-          {/* MEDIUM SEGMENT */}
+          {/* MEDIUM CARD */}
           <button
-            onClick={() => setSelectedPriority('medium')}
-            className={`flex-1 text-center py-2 px-3 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer flex items-center justify-center gap-1 ${
+            onClick={() => setSelectedPriority(selectedPriority === 'medium' ? 'all' : 'medium')}
+            className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 text-center cursor-pointer ${
               selectedPriority === 'medium'
-                ? isLightMode 
-                  ? 'bg-amber-100 text-amber-500 shadow-sm' 
-                  : 'bg-amber-500/20 text-amber-400 border border-emerald-500/10 border-amber-500/30'
-                : 'text-amber-500/60 hover:text-amber-500'
+                ? 'ring-2 ring-amber-500 border-amber-500 scale-[1.02]'
+                : 'border-transparent'
+            } ${
+              isLightMode 
+                ? 'bg-amber-50 text-amber-800 hover:bg-amber-100/60 shadow-xs' 
+                : 'bg-amber-900/40 text-amber-200 hover:bg-radial border-neutral-900/50'
             }`}
-            title="Medium Risks"
           >
-            <AlertCircle className="w-3.5 h-3.5" />
-            <span>Med</span>
-            <span className="text-[9px] opacity-80">({getPriorityCount('medium')})</span>
+            <span className="text-xl font-medium">{getPriorityCount('medium')}</span>
+            <span className="text-xs">Med</span>
           </button>
 
-          {/* LOW SEGMENT */}
+          {/* LOW CARD */}
           <button
-            onClick={() => setSelectedPriority('low')}
-            className={`flex-1 text-center py-2 px-3 rounded-xl text-xs font-bold transition-all duration-150 cursor-pointer flex items-center justify-center gap-1 ${
+            onClick={() => setSelectedPriority(selectedPriority === 'low' ? 'all' : 'low')}
+            className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-200 text-center cursor-pointer ${
               selectedPriority === 'low'
-                ? isLightMode 
-                  ? 'bg-blue-100 text-blue-755 shadow-sm' 
-                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                : 'text-blue-500/60 hover:text-blue-500'
+                ? 'ring-2 ring-green-500 border-green-500 scale-[1.02]'
+                : 'border-transparent'
+            } ${
+              isLightMode 
+                ? 'bg-green-50 text-green-800 hover:bg-green-100/60 shadow-xs' 
+                : 'bg-green-900/40 text-green-200 hover:bg-radial border-neutral-900/50'
             }`}
-            title="Low Risks"
           >
-            <ArrowDownCircle className="w-3.5 h-3.5" />
-            <span>Low</span>
-            <span className="text-[9px] opacity-80">({getPriorityCount('low')})</span>
+            <span className="text-xl font-medium">{getPriorityCount('low')}</span>
+            <span className="text-xs">Low</span>
           </button>
-
         </div>
       </div>
 

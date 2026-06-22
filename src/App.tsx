@@ -1563,16 +1563,20 @@ export default function App() {
             }`}>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 relative">
                 <div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-mono uppercase bg-blue-500/10 border border-blue-500/20 text-blue-500 px-2 py-0.5 rounded-full font-extrabold animate-pulse">
-                      Active Workspace specs
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      isLightMode 
+                        ? 'bg-blue-50 text-blue-800' 
+                        : 'bg-blue-900 text-blue-200'
+                    }`}>
+                      Active Workspace Specs
                     </span>
-                    <span className={`text-[10px] font-mono block ${isLightMode ? 'text-neutral-450' : 'text-neutral-500'}`}>
-                      Launched on: {activeProject.createdAt ? new Date(activeProject.createdAt).toLocaleDateString() : 'N/A'}
+                    <span className={`text-xs font-mono block ${isLightMode ? 'text-neutral-500' : 'text-neutral-400'}`}>
+                      Launched on: {activeProject.createdAt ? new Date(activeProject.createdAt).toLocaleDateString() : 'N/A'} • Workspace Tag
                     </span>
                   </div>
-                  <h2 className={`text-xl md:text-2xl font-black tracking-tight mt-1 flex items-center gap-1.5 ${
-                    isLightMode ? 'text-neutral-900' : 'text-white'
+                  <h2 className={`text-2xl font-medium tracking-tight mt-2 flex items-center gap-1.5 ${
+                    isLightMode ? 'text-neutral-950' : 'text-white'
                   }`}>
                     {activeProject.name}
                   </h2>
@@ -1631,6 +1635,44 @@ export default function App() {
               selectedCategory={selectedCategory}
               isLightMode={isLightMode}
               accent={accent}
+              onAssignClick={(memberId) => {
+                const unassignedTasks = activeProject.items.filter(item => !item.assignedTo?.includes(memberId));
+                if (unassignedTasks.length === 0) {
+                  showToast("All current specifications are already delegated to this collaborator!", "info");
+                  return;
+                }
+                
+                const taskListString = unassignedTasks.map((t, index) => `${index + 1}. [${activeProject.categories.find(c=>c.id===t.category)?.name || t.category}] ${t.title}`).join('\n');
+                const indexStr = window.prompt(
+                  `Select a standard specification to delegate to this team member:\n\n${taskListString}\n\nType the number to assign (1 - ${unassignedTasks.length}):`
+                );
+                
+                if (indexStr === null) return; // User canceled
+                const idx = parseInt(indexStr.trim(), 10) - 1;
+                if (isNaN(idx) || idx < 0 || idx >= unassignedTasks.length) {
+                  showToast("Invalid choice entered.", "warning");
+                  return;
+                }
+                
+                const targetTask = unassignedTasks[idx];
+                const updatedItems = activeProject.items.map(item => {
+                  if (item.id === targetTask.id) {
+                    const nextAssigned = item.assignedTo ? [...item.assignedTo] : [];
+                    if (!nextAssigned.includes(memberId)) {
+                      nextAssigned.push(memberId);
+                    }
+                    return {
+                      ...item,
+                      assignedTo: nextAssigned,
+                      updatedAt: new Date().toISOString()
+                    };
+                  }
+                  return item;
+                });
+                
+                updateActiveProjectState({ items: updatedItems });
+                showToast(`Successfully delegated compliance spec "${targetTask.title}"!`, "success");
+              }}
             />
 
             {/* Filter and searching row */}
