@@ -1,6 +1,6 @@
 {
   "name": "Production Readiness Checklist",
-  "description": "An interactive, iOS-style dashboard to track and manage critical production readiness checklist items including security, data integrity, testing, systems logic, and infrastructure.",
+  "description": "Interactive dashboard to track and manage critical production readiness checklist items including security, testing, and infrastructure.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

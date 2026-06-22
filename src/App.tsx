@@ -556,8 +556,37 @@ export default function App() {
         }
       ]
     };
-    navigator.clipboard.writeText(JSON.stringify(sample, null, 2));
-    showToast("Template copied to clipboard. Paste below or save to file!", "success");
+    if (safeCopyToClipboard(JSON.stringify(sample, null, 2))) {
+      showToast("Template copied to clipboard. Paste below or save to file!", "success");
+    } else {
+      showToast("Could not copy automatically. Copied failed.", "warning");
+    }
+  };
+
+  const safeCopyToClipboard = (text: string): boolean => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_) {}
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.opacity = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch (err) {
+      console.error('Fallback copy failed', err);
+      return false;
+    }
   };
 
   // --- ONLINE SYNC ORCHESTRATION SHARING ---
@@ -566,10 +595,13 @@ export default function App() {
       const payload = btoa(unescape(encodeURIComponent(JSON.stringify(activeProject))));
       const shareUrl = `${window.location.origin}${window.location.pathname}?shared=${payload}`;
       
-      navigator.clipboard.writeText(shareUrl);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 3000);
-      showToast("Magic online team sync link generated! Copied to clipboard.", "success");
+      if (safeCopyToClipboard(shareUrl)) {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 3000);
+        showToast("Magic online team sync link generated! Copied to clipboard.", "success");
+      } else {
+        showToast("Link copy failed.", "warning");
+      }
       return shareUrl;
     } catch (err) {
       console.error(err);
@@ -610,8 +642,13 @@ export default function App() {
       `Cheers!`
     );
 
-    window.open(`mailto:?subject=${subject}&body=${emailBody}`);
-    showToast("Opening default mail dispatch interface...", "info");
+    try {
+      window.location.href = `mailto:?subject=${subject}&body=${emailBody}`;
+    } catch (err) {
+      console.error("Mailto direct invocation failed", err);
+      window.open(`mailto:?subject=${subject}&body=${emailBody}`);
+    }
+    showToast("Launching default email dispatch payload...", "info");
   };
 
   // --- ITEM CHECKS INTEGRATION CONTROLLERS ---
